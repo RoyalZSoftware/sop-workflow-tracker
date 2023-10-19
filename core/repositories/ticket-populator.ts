@@ -15,6 +15,7 @@ export class TicketPopulator {
     }
 
     populate(ticket: Ticket): Observable<PopulatedTicket> {
+        if (ticket.ticketStepIds.length == 0) return of(ticket as unknown as PopulatedTicket);
         return zip(...ticket.ticketStepIds.map(c => this._ticketStepRepository.get(c))).pipe(
             map((steps) => {
                 const populatedTicket = ticket as unknown as PopulatedTicket;

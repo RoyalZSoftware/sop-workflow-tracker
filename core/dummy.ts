@@ -1,8 +1,9 @@
 import { Observable, of } from "rxjs";
-import { StepId, Step } from "./models/template";
+import { StepId, Step, TemplateId, Template } from "./models/template";
 import { Ticket, TicketId, TicketStep, TicketStepId, TicketStepRepository } from "./models/ticket";
 import { StepRepository } from "./repositories/step-repository";
 import { TicketFilter, TicketRepository } from "./repositories/ticket-repository";
+import { TemplateRepository } from "./repositories/template-repository";
 
 export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {value: string}> {
     constructor(public items: T[] = []) {
@@ -15,7 +16,7 @@ export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {val
     }
 
     baseGet(id: TId) {
-        return this.items.find(c => c.id!.value == id.value);
+        return this.items.find(c => c.id?.value == id.value);
     }
 
     baseGetAll() {
@@ -74,4 +75,16 @@ export class DummyTicketStepRepository extends BaseDummyRepository<TicketStep, T
         return of(this.baseGet(ticketStepId));
     }
 
+}
+
+export class DummyTemplateRepository extends BaseDummyRepository<Template, TemplateId> implements TemplateRepository {
+    get(id: TemplateId): Observable<Template | undefined> {
+        return of(this.baseGet(id));
+    }
+    getAll(): Observable<Template[]> {
+        return of(this.baseGetAll());
+    }
+    idFactory(): TemplateId {
+        return new TemplateId(this.baseNextId());
+    }
 }

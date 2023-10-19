@@ -1,201 +1,78 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import {
   DummyStepRepository,
+  DummyTemplateRepository,
   DummyTicketRepository,
   DummyTicketStepRepository,
-  PopulatedTicket,
-  Ticket,
   TicketId,
   TicketPopulator,
+  TicketStep,
+  TicketStepId,
 } from "core";
-import {
-  Avatar,
-  Button,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  TextField,
-} from "@mui/material";
-import { Observable, map } from "rxjs";
-
-export const AppContext = createContext({
-  ticketRepository: new DummyTicketRepository(),
-  stepRepository: new DummyStepRepository(),
-  ticketStepRepository: new DummyTicketStepRepository(),
-  ticketPopulator: undefined as unknown as TicketPopulator,
-});
-
-function TList<T>(
-  fetchItems: Observable<T[]>,
-  displayFactory: (item: T) => string,
-  onClick: (item: T) => void
-) {
-  const [items, setItems] = useState([] as any);
-
-  const fetch = () => {
-    fetchItems
-      .subscribe((fetchedItems) => {
-        setItems(fetchedItems);
-      })
-      .unsubscribe();
-  };
-
-  useEffect(() => {
-    fetch();
-  }, []);
-
-  const Component = () => (
-    <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
-      {items.map((c: any) => (
-        <ListItem onClick={() => onClick(c)}>
-          <ListItemAvatar>
-            <Avatar></Avatar>
-          </ListItemAvatar>
-          <ListItemText primary={displayFactory(c)} secondary="July 20, 2014" />
-        </ListItem>
-      ))}
-    </List>
-  );
-
-  return {
-    fetch,
-    Component,
-  };
-}
-
-function TicketList({ refresh }: { refresh: any }) {
-  const ticketRepository = useContext(AppContext).ticketRepository;
-  const fetchSteps = ticketRepository.getAll();
-
-  const [selectedTicket, selectTicket] = useState(undefined as unknown as Ticket);
-
-  const myList = TList(
-    fetchSteps,
-    (i) => `#${i.id?.value} - ${i.name}`,
-    (item) => {
-      selectTicket(item);
-    }
-  );
-
-  useEffect(() => {
-    myList.fetch();
-  }, [refresh]);
-
-  return (
-    <div>
-      <h1>Tickets</h1>
-      <myList.Component></myList.Component>
-      {selectedTicket ? <StepList ticket={selectedTicket} /> : <></>}
-    </div>
-  );
-}
-
-function StepList({ ticket }: { ticket: Ticket }) {
-  const { ticketPopulator, ticketStepRepository } = useContext(AppContext);
-  const fetchItems = ticketPopulator.populate(ticket).pipe(
-    map((populatedTicket: PopulatedTicket | undefined) => {
-      return populatedTicket!.ticketSteps;
-    })
-  );
-
-  const onClick = () => {
-    alert("Updating");
-  };
-
-  const myList = TList(fetchItems, (c) => c.title, onClick);
-
-  return <div>
-    <h1>Schritte von {ticket.name}</h1>
-    <myList.Component></myList.Component>
-    </div>;
-}
-
-function CreateTicket({ doRefresh }: { doRefresh: () => any }) {
-  const { ticketRepository } = useContext(AppContext);
-
-  const [ticketName, setTicketName] = useState("");
-
-  const onClick = () => {
-    const ticket = new Ticket(ticketName);
-    ticketRepository.save(ticket).subscribe(() => {
-      alert(ticketRepository.items.length);
-      doRefresh();
-    });
-  };
-
-  return (
-    <div>
-      <TextField
-        label="Ticket name"
-        onChange={(v) => setTicketName(v.target.value)}
-        value={ticketName}
-      />
-      <Button onClick={onClick} variant="contained">
-        Erstellen
-      </Button>
-    </div>
-  );
-}
-
-function RefreshContextProvider() {
-  const [refresh, setRefresh] = useState(new Date());
-
-  return {
-    doRefresh: () => {
-      setRefresh(new Date());
-    },
-    refresh,
-  };
-}
+import { AppContext } from "./AppContext";
+import { TicketContext } from "./components/tickets";
+import { Navbar } from "./components/navbar";
 
 function App() {
+  const [templateRepository] = useState(new DummyTemplateRepository());
   const [ticketRepository] = useState(
     new DummyTicketRepository([
       {
         name: "Tobis Körnerbrotbäckerei aufmachen",
-        id: new TicketId("1"),
-        ticketStepIds: [],
+        id: new TicketId("0"),
+        ticketStepIds: [new TicketStepId("0")],
       },
       {
-        name: "Ticket zum Kake essen",
-        id: new TicketId("2"),
+        name: "Ticket",
+        id: new TicketId("1"),
         ticketStepIds: [],
       },
       { name: "Kaufland ausrauben", id: new TicketId("3"), ticketStepIds: [] },
       {
         name: "Auf eine Statue klettern",
-        id: new TicketId("4"),
+        id: new TicketId("2"),
         ticketStepIds: [],
       },
       {
         name: "Plastikbeutel ausdrucken",
-        id: new TicketId("5"),
+        id: new TicketId("3"),
         ticketStepIds: [],
       },
     ])
   );
   const [stepRepository] = useState(new DummyStepRepository());
-  const [ticketStepRepository] = useState(new DummyTicketStepRepository());
+  const sampleTicketStep = new TicketStep(
+    "Hosentaschenleeren",
+    undefined,
+    "Test",
+    true
+  );
+  sampleTicketStep.id = new TicketStepId("0");
+  const [ticketStepRepository] = useState(
+    new DummyTicketStepRepository([sampleTicketStep])
+  );
   const [ticketPopulator] = useState(
     new TicketPopulator(ticketRepository, ticketStepRepository)
   );
 
-  const ticketRefreshContext = RefreshContextProvider();
-
   return (
-    <AppContext.Provider
-      value={{
-        ticketRepository,
-        ticketStepRepository,
-        stepRepository,
-        ticketPopulator,
-      }}
-    >
-      <TicketList refresh={ticketRefreshContext.refresh} />
-      <CreateTicket doRefresh={() => ticketRefreshContext.doRefresh()} />
-    </AppContext.Provider>
+    <>
+      <Navbar />
+      <div style={{ padding: 32, height: "100%" }}>
+        <AppContext.Provider
+          value={{
+            ticketRepository,
+            ticketStepRepository,
+            stepRepository,
+            ticketPopulator,
+            templateRepository,
+          }}
+        >
+          <TicketContext></TicketContext>
+        </AppContext.Provider>
+      </div>
+    </>
   );
 }
 
