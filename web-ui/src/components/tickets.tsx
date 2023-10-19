@@ -11,11 +11,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  Ticket,
-  TicketRepository,
-} from "core";
-import { useContext, useEffect, useState } from "react";
+import { Ticket, TicketRepository } from "core";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { AppContext } from "../AppContext";
 import { Add } from "@mui/icons-material";
 import CreateTicketDialog from "./create-ticket-dialog";
@@ -38,7 +35,7 @@ function TicketsList({
     <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
       {tickets.map((ticket) => (
         <ListItemButton
-          selected={selectedTicket == ticket}
+          selected={selectedTicket === ticket}
           onClick={() => onClick(ticket)}
           style={{ width: "100%" }}
         >
@@ -80,27 +77,29 @@ export function CreateTicket({
 }
 
 export function TicketContext() {
-  const { ticketRepository, ticketPopulator, templateRepository, ticketBuilder, ticketStepRepository } = useContext(AppContext);
+  const {
+    ticketRepository,
+    ticketPopulator,
+    templateRepository,
+    ticketBuilder,
+    ticketStepRepository,
+  } = useContext(AppContext);
   const [tickets, setTickets] = useState([] as Ticket[]);
   const [selectedTicket, selectTicket] = useState(undefined as any as Ticket);
   const [refreshedAt, setRefreshedAt] = useState(new Date());
 
   const [isCreateTicketDialogOpen, setCreateTicketDialogOpen] = useState(false);
 
-  const fetch = () => {
-    (async () => {
-      ticketRepository
-        .getAll()
-        .toPromise()
-        .then((fetchedTickets: any) => {
-          setTickets(fetchedTickets);
-        });
-    })();
-  };
+  const fetch = useCallback(() => {
+    return ticketRepository
+      .getAll()
+      .subscribe((fetchedTickets) => setTickets(fetchedTickets))
+      .unsubscribe();
+  }, [ticketRepository]);
 
   useEffect(() => {
     fetch();
-  }, [refreshedAt]);
+  }, [fetch, refreshedAt]);
 
   return (
     <Grid container spacing={2} style={{ height: "100%" }}>
@@ -138,7 +137,7 @@ export function TicketContext() {
         <Card elevation={1}>
           <CardHeader title="Details" />
           <CardContent>
-            {selectedTicket != undefined ? (
+            {selectedTicket !== undefined ? (
               <TicketSteps
                 ticketStepRepository={ticketStepRepository}
                 ticketPopulator={ticketPopulator}
@@ -153,4 +152,3 @@ export function TicketContext() {
     </Grid>
   );
 }
-
