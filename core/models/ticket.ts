@@ -19,6 +19,7 @@ export class TicketStep {
 export interface TicketStepRepository {
     save(ticketStep: TicketStep): Observable<TicketStep>;
     get(ticketStepId: TicketStepId): Observable<TicketStep | undefined>;
+    update(ticketStepId: TicketStepId, payload: Partial<TicketStep>): Observable<TicketStep>;
 }
 
 export class Ticket {

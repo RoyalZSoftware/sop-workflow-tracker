@@ -28,6 +28,15 @@ export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {val
         this.items.push(item);
         return item;
     }
+
+    baseUpdate(id: TId, payload: Partial<T>) {
+        let indexToUpdate = this.items.findIndex(item => item.id === item.id);
+        this.items[indexToUpdate] = {...this.items[indexToUpdate], ...payload};
+    
+        this.items = Object.assign([], this.items);
+
+        return of(this.items[indexToUpdate]);;
+    }
 }
 
 export class DummyTicketRepository extends BaseDummyRepository<Ticket, TicketId> implements TicketRepository {
@@ -61,10 +70,15 @@ export class DummyStepRepository extends BaseDummyRepository<Step, StepId> imple
     getMulti(stepIds: StepId[]): Observable<Step[]> {
         return of(stepIds.map(c => this.baseGet(c)).filter(c => !!c)) as any;
     }
-
+    update(id: StepId, payload: Partial<Step>): Observable<Step> {
+        return this.baseUpdate(id, payload);
+    }
 }
 
 export class DummyTicketStepRepository extends BaseDummyRepository<TicketStep, TicketStepId> implements TicketStepRepository {
+    update(ticketStepId: TicketStepId, payload: Partial<TicketStep>): Observable<TicketStep> {
+        return this.baseUpdate(ticketStepId, payload);
+    }
     idFactory(): TicketStepId {
         return new TicketStepId(this.baseNextId());
     }

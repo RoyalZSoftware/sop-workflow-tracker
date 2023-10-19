@@ -6,22 +6,20 @@ import {
   Fab,
   Grid,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   TextField,
   Typography,
 } from "@mui/material";
 import {
-  PopulatedTicket,
   Ticket,
-  TicketPopulator,
   TicketRepository,
 } from "core";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../AppContext";
 import { Add } from "@mui/icons-material";
 import CreateTicketDialog from "./create-ticket-dialog";
+import { TicketSteps } from "./ticket-steps";
 
 function TicketsList({
   selectTicket,
@@ -82,7 +80,7 @@ export function CreateTicket({
 }
 
 export function TicketContext() {
-  const { ticketRepository, ticketPopulator, templateRepository, ticketBuilder } = useContext(AppContext);
+  const { ticketRepository, ticketPopulator, templateRepository, ticketBuilder, ticketStepRepository } = useContext(AppContext);
   const [tickets, setTickets] = useState([] as Ticket[]);
   const [selectedTicket, selectTicket] = useState(undefined as any as Ticket);
   const [refreshedAt, setRefreshedAt] = useState(new Date());
@@ -142,6 +140,7 @@ export function TicketContext() {
           <CardContent>
             {selectedTicket != undefined ? (
               <TicketSteps
+                ticketStepRepository={ticketStepRepository}
                 ticketPopulator={ticketPopulator}
                 ticket={selectedTicket}
               ></TicketSteps>
@@ -155,38 +154,3 @@ export function TicketContext() {
   );
 }
 
-export function TicketSteps({
-  ticket,
-  ticketPopulator,
-}: {
-  ticket: Ticket;
-  ticketPopulator: TicketPopulator;
-}) {
-  const [populatedTicket, setPopulatedTicket] = useState(
-    undefined as PopulatedTicket | undefined
-  );
-
-  useEffect(() => {
-    const subscription = ticketPopulator
-      .populate(ticket)
-      .subscribe((fetchedPopulatedTicket) => {
-        setPopulatedTicket(fetchedPopulatedTicket);
-      });
-    return () => subscription.unsubscribe();
-  }, [ticket]);
-
-  return (
-    <List>
-      {populatedTicket?.ticketSteps?.map((c) => (
-        <ListItem>
-          <ListItemText primary={c.title} secondary={c.description} />
-        </ListItem>
-      ))}
-      {(populatedTicket?.ticketSteps?.length ?? 0) > 0 ? (
-        <></>
-      ) : (
-        <Typography variant="body1">Keine Schritte gefunden</Typography>
-      )}
-    </List>
-  );
-}

@@ -5,4 +5,5 @@ export interface StepRepository {
     get(stepId: StepId): Observable<Step | undefined>;
     getMulti(stepIds: StepId[]): Observable<Step[]>;
     save(step: Step): Observable<Step>;
+    update(stepId: StepId, payload: Partial<Step>): Observable<Step>;
 }
