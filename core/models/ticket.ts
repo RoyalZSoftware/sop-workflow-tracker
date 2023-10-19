@@ -1,4 +1,4 @@
-import { Observable, switchMap, zip } from "rxjs";
+import { Observable, of, switchMap, zip } from "rxjs";
 import { StepRepository } from "../repositories/step-repository";
 import { StepId, Template, TemplateId } from "./template";
 import { TicketRepository } from "../repositories/ticket-repository";
@@ -34,11 +34,16 @@ export class TicketBuilder {
     public createTicketFromTemplate(template: Template): Observable<Ticket> {
         return this._stepRepository.getMulti(template.stepIds!).pipe(
             switchMap((steps) => {
-                const ticketSteps = steps.map(c => ({ ...c }));
-
-                return zip(...ticketSteps.map(c => this._ticketStepRepository.save(
+                const ticketSteps = steps.map(c => this._ticketStepRepository.save(
                     new TicketStep(c.name, c.id, c.description, true)
-                ))).pipe(
+                ));
+                
+                if (ticketSteps.length == 0) {
+                    const ticket = new Ticket(template.name);
+                    return this._ticketRepository.save(ticket);
+                }
+
+                return zip(...ticketSteps).pipe(
                     switchMap((ticketStepIds) => {
                         const ticket = new Ticket(template.name);
                         ticket.ticketStepIds = ticketStepIds.map(c => c.id!);

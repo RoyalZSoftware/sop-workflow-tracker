@@ -82,7 +82,7 @@ export function CreateTicket({
 }
 
 export function TicketContext() {
-  const { ticketRepository, ticketPopulator, templateRepository } = useContext(AppContext);
+  const { ticketRepository, ticketPopulator, templateRepository, ticketBuilder } = useContext(AppContext);
   const [tickets, setTickets] = useState([] as Ticket[]);
   const [selectedTicket, selectTicket] = useState(undefined as any as Ticket);
   const [refreshedAt, setRefreshedAt] = useState(new Date());
@@ -124,10 +124,14 @@ export function TicketContext() {
               <Add />
             </Fab>
             <CreateTicketDialog
+              ticketBuilder={ticketBuilder}
               ticketRepository={ticketRepository}
               templateRepository={templateRepository}
               isOpen={isCreateTicketDialogOpen}
-              close={() => setCreateTicketDialogOpen(false)}
+              close={() => {
+                setRefreshedAt(new Date());
+                setCreateTicketDialogOpen(false);
+              }}
             ></CreateTicketDialog>
           </CardContent>
         </Card>

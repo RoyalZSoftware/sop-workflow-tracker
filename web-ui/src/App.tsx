@@ -5,6 +5,9 @@ import {
   DummyTemplateRepository,
   DummyTicketRepository,
   DummyTicketStepRepository,
+  StepId,
+  TemplateId,
+  TicketBuilder,
   TicketId,
   TicketPopulator,
   TicketStep,
@@ -15,7 +18,15 @@ import { TicketContext } from "./components/tickets";
 import { Navbar } from "./components/navbar";
 
 function App() {
-  const [templateRepository] = useState(new DummyTemplateRepository());
+  const [templateRepository] = useState(new DummyTemplateRepository([
+    {
+      name: "Gurke 3D drucken",
+      stepIds: [
+        new StepId('0'),
+      ],
+      id: new TemplateId('0'),
+    }
+  ]));
   const [ticketRepository] = useState(
     new DummyTicketRepository([
       {
@@ -56,6 +67,8 @@ function App() {
     new TicketPopulator(ticketRepository, ticketStepRepository)
   );
 
+  const [ticketBuilder] = useState(new TicketBuilder(stepRepository, ticketRepository, ticketStepRepository));
+
   return (
     <>
       <Navbar />
@@ -67,6 +80,7 @@ function App() {
             stepRepository,
             ticketPopulator,
             templateRepository,
+            ticketBuilder,
           }}
         >
           <TicketContext></TicketContext>

@@ -2,7 +2,7 @@ import { createContext } from "react";
 import {
   DummyStepRepository,
   DummyTicketRepository,
-  DummyTicketStepRepository, TicketPopulator
+  DummyTicketStepRepository, TemplateRepository, TicketBuilder, TicketPopulator
 } from "core";
 
 
@@ -11,5 +11,6 @@ export const AppContext = createContext({
   stepRepository: new DummyStepRepository(),
   ticketStepRepository: new DummyTicketStepRepository(),
   ticketPopulator: undefined as unknown as TicketPopulator,
-  templateRepository: undefined as unknown as any,
+  templateRepository: undefined as unknown as TemplateRepository,
+  ticketBuilder: undefined as unknown as TicketBuilder,
 });
