@@ -26,7 +26,7 @@ function App() {
       ],
       id: new TemplateId('0'),
     }
-  ]));
+  ], "templates"));
   const [ticketRepository] = useState(
     new DummyTicketRepository([
       {
@@ -50,9 +50,9 @@ function App() {
         id: new TicketId("3"),
         ticketStepIds: [],
       },
-    ])
+    ], "tickets")
   );
-  const [stepRepository] = useState(new DummyStepRepository());
+  const [stepRepository] = useState(new DummyStepRepository([], "steps"));
   const sampleTicketStep = new TicketStep(
     "Hosentaschenleeren",
     undefined,
@@ -61,7 +61,7 @@ function App() {
   );
   sampleTicketStep.id = new TicketStepId("0");
   const [ticketStepRepository] = useState(
-    new DummyTicketStepRepository([sampleTicketStep])
+    new DummyTicketStepRepository([sampleTicketStep], "ticket_steps")
   );
   const [ticketPopulator] = useState(
     new TicketPopulator(ticketRepository, ticketStepRepository)
@@ -73,6 +73,7 @@ function App() {
     <>
       <Navbar />
       <div style={{ padding: 32, height: "100%" }}>
+
         <AppContext.Provider
           value={{
             ticketRepository,

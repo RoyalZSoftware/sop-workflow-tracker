@@ -6,7 +6,11 @@ import { TicketFilter, TicketRepository } from "./repositories/ticket-repository
 import { TemplateRepository } from "./repositories/template-repository";
 
 export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {value: string}> {
-    constructor(public items: T[] = []) {
+    constructor(public items: T[] = [], public localStorageKey: string) {
+        const stringified = window.localStorage.getItem(this.localStorageKey);
+        if (stringified != undefined) {
+            this.items = JSON.parse(stringified);
+        }
     }
 
     abstract idFactory(): TId;
@@ -26,6 +30,7 @@ export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {val
     baseSave(item: T): T {
         item.id = this.idFactory();
         this.items.push(item);
+        window.localStorage.setItem(this.localStorageKey, JSON.stringify(this.items));
         return item;
     }
 
