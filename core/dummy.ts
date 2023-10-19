@@ -39,6 +39,7 @@ export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {val
         this.items[indexToUpdate] = {...this.items[indexToUpdate], ...payload};
     
         this.items = Object.assign([], this.items);
+        window.localStorage.setItem(this.localStorageKey, JSON.stringify(this.items));
 
         return of(this.items[indexToUpdate]);;
     }
