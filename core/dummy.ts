@@ -30,7 +30,7 @@ export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {val
     }
 
     baseUpdate(id: TId, payload: Partial<T>) {
-        let indexToUpdate = this.items.findIndex(item => item.id === item.id);
+        let indexToUpdate = this.items.findIndex(item => item.id === id);
         this.items[indexToUpdate] = {...this.items[indexToUpdate], ...payload};
     
         this.items = Object.assign([], this.items);
