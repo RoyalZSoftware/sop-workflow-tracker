@@ -8,6 +8,7 @@ import { TemplateRepository } from "core";
 export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {value: string}> {
     constructor(public items: T[] = [], public localStorageKey: string) {
         const stringified = window.localStorage.getItem(this.localStorageKey);
+        this.items = items.map((c, index) => ({...c, id: {value: index.toString()}}));
         if (stringified !== undefined && stringified !== null) {
             this.items = JSON.parse(stringified);
         }

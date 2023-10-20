@@ -21,52 +21,45 @@ import { TicketContext } from "./components/tickets";
 import { Navbar } from "./components/navbar";
 
 function App() {
+  const [stepRepository] = useState(new DummyStepRepository([
+    new Step("Box drucken"),
+    new Step("Schraubenmounts einsetzen"),
+    new Step("1. Schablonenwand drucken"),
+    new Step("2. Schablonenwand drucken"),
+    new Step("3. Schablonenwand drucken"),
+    new Step("PCBs einkleben"),
+    new Step("Raspberry einkleben"),
+    new Step("Installation vom Raspberry"),
+    new Step("Test vom Raspberry"),
+    new Step("Verkabeln"),
+  ], "steps"));
   const [templateRepository] = useState(new DummyTemplateRepository([
     {
-      name: "Gurke 3D drucken",
+      name: "Controlbox fertigung",
       stepIds: [
         new StepId('0'),
+        new StepId('1'),
+        new StepId('2'),
+        new StepId('3'),
+        new StepId('4'),
+        new StepId('5'),
+        new StepId('6'),
+        new StepId('7'),
+        new StepId('8'),
       ],
       id: new TemplateId('0'),
     }
   ], "templates"));
   const [ticketRepository] = useState(
-    new DummyTicketRepository([
-      {
-        name: "Tobis Körnerbrotbäckerei aufmachen",
-        id: new TicketId("0"),
-        ticketStepIds: [new TicketStepId("0")],
-      },
-      {
-        name: "Ticket",
-        id: new TicketId("1"),
-        ticketStepIds: [],
-      },
-      { name: "Kaufland ausrauben", id: new TicketId("3"), ticketStepIds: [] },
-      {
-        name: "Auf eine Statue klettern",
-        id: new TicketId("2"),
-        ticketStepIds: [],
-      },
-      {
-        name: "Plastikbeutel ausdrucken",
-        id: new TicketId("3"),
-        ticketStepIds: [],
-      },
-    ], "tickets")
+    new DummyTicketRepository([], "tickets")
   );
-  const [stepRepository] = useState(new DummyStepRepository([
-    {...new Step("Kartoffel schälen"), id: new StepId("0")},
-  ], "steps"));
-  const sampleTicketStep = new TicketStep(
+  const [ticketStepRepository] = useState(
+    new DummyTicketStepRepository([new TicketStep(
     "Hosentaschenleeren",
-    undefined,
+    new StepId("0"),
     "Test",
     true
-  );
-  sampleTicketStep.id = new TicketStepId("0");
-  const [ticketStepRepository] = useState(
-    new DummyTicketStepRepository([sampleTicketStep], "ticket_steps")
+  )], "ticket_steps")
   );
   const [ticketPopulator] = useState(
     new TicketPopulator(ticketRepository, ticketStepRepository)

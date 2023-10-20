@@ -36,7 +36,7 @@ export class TicketBuilder {
         return this._stepRepository.getMulti(template.stepIds!).pipe(
             switchMap((steps) => {
                 const ticketSteps = steps.map(c => this._ticketStepRepository.save(
-                    new TicketStep(c.name, c.id, c.description, true)
+                    new TicketStep(c.name, c.id, c.description)
                 ));
                 
                 if (ticketSteps.length == 0) {
