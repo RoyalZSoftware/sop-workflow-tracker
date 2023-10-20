@@ -36,6 +36,7 @@
       "react-app/jest"
     ]
   },
+  "homepage": "https://royalzsoftware.github.io/sop-workflow-tracker/",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -47,5 +48,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^6.0.0"
   }
 }
