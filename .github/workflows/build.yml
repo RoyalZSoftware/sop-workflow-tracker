@@ -1,0 +1,51 @@
+name: Deploy pages
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Core modules
+        id: cache-npm-core
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: core/node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - if: ${{ steps.cache-npm-core.outputs.cache-hit != 'true' }}
+        name: List the state of node modules
+        continue-on-error: true
+        run: npm list
+      - name: Install dependencies
+        run: npm install
+        working-directory: core 
+      - name: build core
+        run: npm run build
+        working-directory: core
+      - name: Cache UI modules
+        id: cache-npm-ui
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: web-ui/node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - if: ${{ steps.cache-npm-ui.outputs.cache-hit != 'true' }}
+        name: List the state of node modules
+        continue-on-error: true
+        run: npm list
+      - name: Install dependencies
+        run: npm install
+        working-directory: web-ui 
+      - name: Deploy
+        run: npm run deploy
+        working-directory: web-ui 

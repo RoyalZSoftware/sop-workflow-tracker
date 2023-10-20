@@ -2,7 +2,9 @@
   "name": "core",
   "version": "1.0.0",
   "description": "",
-  "files": ["/dist"],
+  "files": [
+    "/dist"
+  ],
   "types": "dist/main.d.ts",
   "main": "dist/index.js",
   "scripts": {
