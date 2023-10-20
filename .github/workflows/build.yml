@@ -59,5 +59,4 @@ jobs:
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build 
-          working-directory: web-ui
+          folder: web-ui/build
