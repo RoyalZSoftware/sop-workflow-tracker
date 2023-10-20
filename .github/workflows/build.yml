@@ -4,6 +4,7 @@ jobs:
   build-core:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: cache node modules
         id: cache-npm-core
         uses: actions/cache@v3
