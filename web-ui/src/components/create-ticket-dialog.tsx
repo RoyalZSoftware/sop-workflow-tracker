@@ -38,7 +38,7 @@ export default function CreateTicketDialog({
   const createTicketAndClose = () => {
     if (selectedTemplate === undefined) return;
 
-    ticketBuilder.createTicketFromTemplate({...selectedTemplate, name: ticketName}).subscribe((ticket) => {
+    ticketBuilder.createTicketFromTemplate({...selectedTemplate, name: ticketName}).subscribe((ticket: any) => {
       close(ticket);
     });
   }
