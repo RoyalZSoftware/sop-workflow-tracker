@@ -1,10 +1,6 @@
 import { useState } from "react";
 import "./App.css";
 import {
-  DummyStepRepository,
-  DummyTemplateRepository,
-  DummyTicketRepository,
-  DummyTicketStepRepository,
   StepId,
   TemplateId,
   TicketBuilder,
@@ -13,6 +9,12 @@ import {
   TicketStep,
   TicketStepId,
 } from "core";
+import {
+  DummyStepRepository,
+  DummyTemplateRepository,
+  DummyTicketRepository,
+  DummyTicketStepRepository,
+} from './dummy';
 import { AppContext } from "./AppContext";
 import { TicketContext } from "./components/tickets";
 import { Navbar } from "./components/navbar";
