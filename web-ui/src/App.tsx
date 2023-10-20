@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import {
+  Step,
   StepId,
   TemplateId,
   TicketBuilder,
@@ -54,7 +55,9 @@ function App() {
       },
     ], "tickets")
   );
-  const [stepRepository] = useState(new DummyStepRepository([], "steps"));
+  const [stepRepository] = useState(new DummyStepRepository([
+    {...new Step("Kartoffel schälen"), id: new StepId("0")},
+  ], "steps"));
   const sampleTicketStep = new TicketStep(
     "Hosentaschenleeren",
     undefined,
