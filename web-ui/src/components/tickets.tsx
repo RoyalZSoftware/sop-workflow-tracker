@@ -91,7 +91,7 @@ export function TicketContext() {
   const fetch = useCallback(() => {
     return ticketRepository
       .getAll()
-      .subscribe((fetchedTickets) => setTickets(fetchedTickets))
+      .subscribe((fetchedTickets: Ticket[]) => setTickets(fetchedTickets))
       .unsubscribe();
   }, [ticketRepository]);
 

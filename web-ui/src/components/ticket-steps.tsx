@@ -74,7 +74,7 @@ export function TicketSteps({
     (x: Ticket) => {
       const subscription = ticketPopulator
         .populate(x)
-        .subscribe((fetchedPopulatedTicket) => {
+        .subscribe((fetchedPopulatedTicket: PopulatedTicket) => {
           setPopulatedTicket(fetchedPopulatedTicket);
         });
 
