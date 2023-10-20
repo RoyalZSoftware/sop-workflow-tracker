@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/sop-workflow-tracker/static/css/main.073c9b0a.css",
+    "main.js": "/sop-workflow-tracker/static/js/main.cdd93e6b.js",
+    "static/js/787.62449090.chunk.js": "/sop-workflow-tracker/static/js/787.62449090.chunk.js",
+    "index.html": "/sop-workflow-tracker/index.html",
+    "main.073c9b0a.css.map": "/sop-workflow-tracker/static/css/main.073c9b0a.css.map",
+    "main.cdd93e6b.js.map": "/sop-workflow-tracker/static/js/main.cdd93e6b.js.map",
+    "787.62449090.chunk.js.map": "/sop-workflow-tracker/static/js/787.62449090.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.073c9b0a.css",
+    "static/js/main.cdd93e6b.js"
+  ]
+}
