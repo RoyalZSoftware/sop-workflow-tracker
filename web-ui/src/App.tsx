@@ -6,7 +6,6 @@ import {
   TemplateId,
   TicketBuilder,
   TicketPopulator,
-  TicketStep,
 } from "core";
 import {
   DummyStepRepository,
