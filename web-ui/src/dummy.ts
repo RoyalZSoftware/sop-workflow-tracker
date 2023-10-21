@@ -22,10 +22,12 @@ export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {val
     }
 
     baseGet(id: TId) {
+        console.log("Request for: " + id);
         return this.items.find(c => c.id?.value === id.value);
     }
 
     baseGetAll() {
+        console.log("Get all");
         return this.items;
     }
 
@@ -96,7 +98,7 @@ export class DummyTicketStepRepository extends BaseDummyRepository<TicketStep, T
     query(ticketStepFilter: TicketStepFilter): Observable<PaginatedResponse<TicketStep>> {
         return of({
             data: this.items.filter(c => {
-                return c.stepId!.value == ticketStepFilter.stepId!.value;
+                return c.stepId!.value === ticketStepFilter.stepId!.value;
             }),
             hasMore: false,
         } as PaginatedResponse<TicketStep>);

@@ -23,7 +23,7 @@ import { AppContext } from "../AppContext";
 import { Add } from "@mui/icons-material";
 import CreateTicketDialog from "./create-ticket-dialog";
 import { TicketSteps } from "./ticket-steps";
-import { Observable } from "rxjs";
+import { Observable, map } from "rxjs";
 
 function TicketsList({
   selectTicket,
@@ -179,16 +179,7 @@ function NewTicketStepView({
   ticketRepository: TicketRepository;
   stepRepository: StepRepository;
 }) {
-  const [allSteps, setAllSteps] = useState(undefined as any as Step[]);
-
-  useEffect(() => {
-    const subscription = stepRepository
-      .query({})
-      .subscribe((fetched: PaginatedResponse<Step>) => {
-        setAllSteps(fetched.data);
-      });
-    return () => subscription.unsubscribe();
-  }, []);
+  const allSteps = useQuery<Step[]>(() => stepRepository.query({}).pipe(map(({data}: PaginatedResponse<Step>) => data)));
 
   const TicketsFor = ({step}: {step: Step}) => {
     
@@ -198,13 +189,13 @@ function NewTicketStepView({
     
     const foundTicketSteps = useQuery(() => ticketPopulator.getAllTicketStepsForStep(step.id!));
 
-    const allTickets = useQuery(() => ticketRepository.getAll(), []);
+    const allTickets = useQuery(() => ticketRepository.getAll());
 
     return <List>
       {step.name}
       {foundTicketSteps?.filter(c => !c.checked).map((foundStep) => (
       <ListItem>
-      {presentTicket(allTickets.find(c => c.id!.value == foundStep.ticketId!.value)!)}
+      {presentTicket(allTickets.find(c => c.id!.value === foundStep.ticketId!.value)!)}
       </ListItem>
       ))}
     </List>
@@ -222,16 +213,18 @@ function NewTicketStepView({
   );
 }
 
-function useQuery<T>(fetch: () => Observable<T>, deps: any[] = []): T {
+function useQuery<T>(fetch: () => Observable<T>): T {
   const [state, updateState] = useState(undefined as T);
 
+  const f = useCallback(fetch, [fetch]);
+
   useEffect(() => {
-    const subscription = fetch().subscribe((result) => {
+    const subscription = f().subscribe((result) => {
       updateState(result);
     });
 
     return () => subscription.unsubscribe();
-  }, deps);
+  }, [f]);
 
   return state;
 }
