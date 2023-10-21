@@ -1,12 +1,4 @@
-export class StepId {
-    constructor(public value: string) {}
-}
-
-export class Step {
-    templateId?: TemplateId;
-    id?: StepId;
-    constructor(public name: string, public description?: string) { }
-}
+import { StepId } from "./step";
 
 export class TemplateId {
     constructor(public value: string) {}

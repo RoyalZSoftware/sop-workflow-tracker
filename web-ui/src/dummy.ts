@@ -1,9 +1,10 @@
 import { Observable, of } from "rxjs";
-import { StepId, Step, TemplateId, Template } from "core";
+import { StepId, Step, TemplateId, Template, TicketStepFilter, StepRepositoryFilter } from "core";
 import { Ticket, TicketId, TicketStep, TicketStepId, TicketStepRepository } from "core";
 import { StepRepository } from "core";
 import { TicketFilter, TicketRepository } from "core";
 import { TemplateRepository } from "core";
+import { PaginatedResponse } from "core/repositories/paginated-resource";
 
 export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {value: string}> {
     constructor(public items: T[] = [], public localStorageKey: string) {
@@ -47,6 +48,9 @@ export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {val
 }
 
 export class DummyTicketRepository extends BaseDummyRepository<Ticket, TicketId> implements TicketRepository {
+    update(ticketId: TicketId, payload: Partial<Ticket>): Observable<Ticket> {
+        return this.baseUpdate(ticketId, payload);
+    }
     idFactory(): TicketId {
         return new TicketId(this.baseNextId());
     }
@@ -65,6 +69,12 @@ export class DummyTicketRepository extends BaseDummyRepository<Ticket, TicketId>
 }
 
 export class DummyStepRepository extends BaseDummyRepository<Step, StepId> implements StepRepository{
+    query(filter: StepRepositoryFilter): Observable<PaginatedResponse<Step>> {
+        return of({
+            data: this.items,
+            hasMore: false,
+        } as PaginatedResponse<Step>)
+    }
     get(stepId: StepId): Observable<Step | undefined> {
         return of(this.baseGet(stepId));
     }
@@ -83,6 +93,14 @@ export class DummyStepRepository extends BaseDummyRepository<Step, StepId> imple
 }
 
 export class DummyTicketStepRepository extends BaseDummyRepository<TicketStep, TicketStepId> implements TicketStepRepository {
+    query(ticketStepFilter: TicketStepFilter): Observable<PaginatedResponse<TicketStep>> {
+        return of({
+            data: this.items.filter(c => {
+                return c.stepId!.value == ticketStepFilter.stepId!.value;
+            }),
+            hasMore: false,
+        } as PaginatedResponse<TicketStep>);
+    }
     update(ticketStepId: TicketStepId, payload: Partial<TicketStep>): Observable<TicketStep> {
         return this.baseUpdate(ticketStepId, payload);
     }

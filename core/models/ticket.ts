@@ -1,25 +1,13 @@
 import { Observable, of, switchMap, zip } from "rxjs";
 import { StepRepository } from "../repositories/step-repository";
-import { StepId, Template, TemplateId } from "./template";
+import { Template, TemplateId } from "./template";
 import { TicketRepository } from "../repositories/ticket-repository";
+import { TicketStep, TicketStepId } from "./ticket-step";
+import { TicketStepRepository } from "../repositories/ticket-step-repository";
+import { Step } from "./step";
 
 export class TicketId {
     constructor(public value: string) { }
-}
-
-export class TicketStepId {
-    constructor(public value: string) { }
-}
-
-export class TicketStep {
-    public id?: TicketStepId;
-    constructor(public title: string, public stepId?: StepId, public description?: string, public checked: boolean = false, public createdAt: Date = new Date()) { }
-}
-
-export interface TicketStepRepository {
-    save(ticketStep: TicketStep): Observable<TicketStep>;
-    get(ticketStepId: TicketStepId): Observable<TicketStep | undefined>;
-    update(ticketStepId: TicketStepId, payload: Partial<TicketStep>): Observable<TicketStep>;
 }
 
 export class Ticket {
@@ -34,24 +22,28 @@ export class TicketBuilder {
 
     public createTicketFromTemplate(template: Template): Observable<Ticket> {
         return this._stepRepository.getMulti(template.stepIds!).pipe(
-            switchMap((steps) => {
-                const ticketSteps = steps.map(c => this._ticketStepRepository.save(
-                    new TicketStep(c.name, c.id, c.description)
-                ));
-                
-                if (ticketSteps.length == 0) {
-                    const ticket = new Ticket(template.name);
-                    return this._ticketRepository.save(ticket);
-                }
+            switchMap((steps: Step[]) => {
+                const baseTicket = new Ticket(template.name);
+                return this._ticketRepository.save(baseTicket).pipe(
+                    switchMap((savedTicket: Ticket) => {
+                        const ticketSteps = steps.map(c => this._ticketStepRepository.save(
+                            {...new TicketStep(c.name, c.id, c.description), ticketId: savedTicket.id!}
+                        ));
 
-                return zip(...ticketSteps).pipe(
-                    switchMap((ticketStepIds) => {
-                        const ticket = new Ticket(template.name);
-                        ticket.ticketStepIds = ticketStepIds.map(c => c.id!);
-                        return this._ticketRepository.save(ticket);
-                    })
+                        if (ticketSteps.length == 0) {
+                            return of(savedTicket);
+                        }
+
+                        return zip(...ticketSteps).pipe(
+                            switchMap((ticketStepIds) => {
+                                return this._ticketRepository.update(savedTicket.id!, {
+                                    ticketStepIds: ticketStepIds.map(c => c.id!),
+                                });
+                            })
+                        )
+                    }),
                 )
-            }),
-        )
+            })
+        );
     }
 }

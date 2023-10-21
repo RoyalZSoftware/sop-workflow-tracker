@@ -3,18 +3,27 @@ import {
   Fab,
   Grid,
   List,
+  ListItem,
   ListItemButton,
   ListItemText,
   Paper,
   TextField,
   Typography,
 } from "@mui/material";
-import { Ticket, TicketRepository } from "core";
+import {
+  PaginatedResponse,
+  Step,
+  StepRepository,
+  Ticket,
+  TicketPopulator,
+  TicketRepository,
+} from "core";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AppContext } from "../AppContext";
 import { Add } from "@mui/icons-material";
 import CreateTicketDialog from "./create-ticket-dialog";
 import { TicketSteps } from "./ticket-steps";
+import { Observable } from "rxjs";
 
 function TicketsList({
   selectTicket,
@@ -77,6 +86,7 @@ export function CreateTicket({
 export function TicketContext() {
   const {
     ticketRepository,
+    stepRepository,
     ticketPopulator,
     templateRepository,
     ticketBuilder,
@@ -146,6 +156,82 @@ export function TicketContext() {
           )}
         </Paper>
       </Grid>
+      <Grid item xs={12}>
+        <Paper elevation={1} style={{ padding: 32 }}>
+          <Typography variant="h4">New Ticket Step View</Typography>
+          <NewTicketStepView
+          ticketRepository={ticketRepository}
+            ticketPopulator={ticketPopulator}
+            stepRepository={stepRepository}
+          />
+        </Paper>
+      </Grid>
     </Grid>
   );
+}
+
+function NewTicketStepView({
+  ticketPopulator,
+  stepRepository,
+  ticketRepository,
+}: {
+  ticketPopulator: TicketPopulator;
+  ticketRepository: TicketRepository;
+  stepRepository: StepRepository;
+}) {
+  const [allSteps, setAllSteps] = useState(undefined as any as Step[]);
+
+  useEffect(() => {
+    const subscription = stepRepository
+      .query({})
+      .subscribe((fetched: PaginatedResponse<Step>) => {
+        setAllSteps(fetched.data);
+      });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const TicketsFor = ({step}: {step: Step}) => {
+    
+    const presentTicket = useCallback((ticket: Ticket) => {
+      return `# ${ticket.id!.value} - ${ticket.name}`;
+    }, []);
+    
+    const foundTicketSteps = useQuery(() => ticketPopulator.getAllTicketStepsForStep(step.id!));
+
+    const allTickets = useQuery(() => ticketRepository.getAll(), []);
+
+    return <List>
+      {step.name}
+      {foundTicketSteps?.filter(c => !c.checked).map((foundStep) => (
+      <ListItem>
+      {presentTicket(allTickets.find(c => c.id!.value == foundStep.ticketId!.value)!)}
+      </ListItem>
+      ))}
+    </List>
+  }
+
+  return (
+    <div>
+      <List>
+        {allSteps ? 
+        allSteps.map((step) => <TicketsFor step={step}/>)
+        : <></>
+        }
+      </List>
+    </div>
+  );
+}
+
+function useQuery<T>(fetch: () => Observable<T>, deps: any[] = []): T {
+  const [state, updateState] = useState(undefined as T);
+
+  useEffect(() => {
+    const subscription = fetch().subscribe((result) => {
+      updateState(result);
+    });
+
+    return () => subscription.unsubscribe();
+  }, deps);
+
+  return state;
 }

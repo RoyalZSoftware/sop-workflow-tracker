@@ -1,7 +1,10 @@
 import { Observable, map, of, switchMap, zip } from "rxjs";
 import { Template } from "../models/template";
-import { Ticket, TicketId, TicketStep, TicketStepRepository } from "../models/ticket";
+import { Ticket, TicketId } from "../models/ticket";
 import { TicketRepository } from "./ticket-repository";
+import { TicketStep } from "../models/ticket-step";
+import { StepId } from "../models/step";
+import { TicketStepRepository } from "./ticket-step-repository";
 
 export type PopulatedTicket = Omit<Ticket, 'ticketStepIds' | 'templateId'> & {ticketSteps: TicketStep[], template: Template};
 
@@ -25,5 +28,12 @@ export class TicketPopulator {
                 return populatedTicket;
             })
         )
+    }
+
+    getAllTicketStepsForStep(stepId: StepId): Observable<TicketStep[]> {
+        return this._ticketStepRepository.query({
+            limit: 50,
+            stepId,
+        }).pipe(map((i) => i.data));
     }
 }

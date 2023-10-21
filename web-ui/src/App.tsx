@@ -52,12 +52,7 @@ function App() {
     new DummyTicketRepository([], "tickets")
   );
   const [ticketStepRepository] = useState(
-    new DummyTicketStepRepository([new TicketStep(
-    "Hosentaschenleeren",
-    new StepId("0"),
-    "Test",
-    true
-  )], "ticket_steps")
+    new DummyTicketStepRepository([], "ticket_steps")
   );
   const [ticketPopulator] = useState(
     new TicketPopulator(ticketRepository, ticketStepRepository)
