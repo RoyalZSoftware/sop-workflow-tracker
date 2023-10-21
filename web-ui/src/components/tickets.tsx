@@ -17,6 +17,7 @@ import {
   Ticket,
   TicketPopulator,
   TicketRepository,
+  TicketStep,
 } from "core";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AppContext } from "../AppContext";
@@ -187,9 +188,9 @@ function NewTicketStepView({
       return `# ${ticket.id!.value} - ${ticket.name}`;
     }, []);
     
-    const foundTicketSteps = useQuery(() => ticketPopulator.getAllTicketStepsForStep(step.id!));
+    const foundTicketSteps = useQuery<TicketStep[]>(() => ticketPopulator.getAllTicketStepsForStep(step.id!));
 
-    const allTickets = useQuery(() => ticketRepository.getAll());
+    const allTickets = useQuery<Ticket[]>(() => ticketRepository.getAll());
 
     return <List>
       {step.name}
