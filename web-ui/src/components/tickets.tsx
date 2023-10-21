@@ -11,20 +11,18 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  PaginatedResponse,
   Step,
   StepRepository,
   Ticket,
-  TicketPopulator,
   TicketRepository,
-  TicketStep,
+  TicketStepRepository,
 } from "core";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AppContext } from "../AppContext";
 import { Add } from "@mui/icons-material";
 import CreateTicketDialog from "./create-ticket-dialog";
 import { TicketSteps } from "./ticket-steps";
-import { Observable, map } from "rxjs";
+import { Observable, map, zip } from "rxjs";
 
 function TicketsList({
   selectTicket,
@@ -151,6 +149,7 @@ export function TicketContext() {
               ticketStepRepository={ticketStepRepository}
               ticketPopulator={ticketPopulator}
               ticket={selectedTicket}
+              setRefreshedAt={setRefreshedAt}
             ></TicketSteps>
           ) : (
             <Typography variant="body1">Kein Ticket ausgewählt.</Typography>
@@ -161,9 +160,10 @@ export function TicketContext() {
         <Paper elevation={1} style={{ padding: 32 }}>
           <Typography variant="h4">New Ticket Step View</Typography>
           <NewTicketStepView
-          ticketRepository={ticketRepository}
-            ticketPopulator={ticketPopulator}
+            ticketStepRepository={ticketStepRepository}
+            ticketRepository={ticketRepository}
             stepRepository={stepRepository}
+            refreshed={refreshedAt}
           />
         </Paper>
       </Grid>
@@ -171,61 +171,109 @@ export function TicketContext() {
   );
 }
 
-function NewTicketStepView({
-  ticketPopulator,
-  stepRepository,
+function reduceToMap<T>(mapKeyFactory: (t: T) => string, itemsArray: T[]) {
+  return itemsArray.reduce((prev, curr) => {
+    prev[mapKeyFactory(curr)] = curr;
+    return prev;
+  }, {} as { [key: string]: T });
+}
+
+function getStepGroupedTickets({
+  ticketStepRepository,
   ticketRepository,
 }: {
-  ticketPopulator: TicketPopulator;
+  ticketStepRepository: TicketStepRepository;
   ticketRepository: TicketRepository;
+}): Observable<{ [stepId: string]: Ticket }> {
+  const allTicketSteps$ = ticketStepRepository
+    .query({})
+    .pipe(map(({ data }) => data));
+  const allTickets$ = ticketRepository
+    .getAll()
+    .pipe(
+      map((tickets: Ticket[]) =>
+        reduceToMap<Ticket>((t) => t.id!.value, tickets)
+      )
+    );
+
+  return zip(allTicketSteps$, allTickets$).pipe(
+    map(([ticketSteps, tickets]) => {
+      return ticketSteps.filter(c => !c.checked).reduce((prev, curr) => {
+        prev[curr.stepId!.value] ??= [];
+        prev[curr.stepId!.value].push(tickets[curr.ticketId!.value]);
+        return prev;
+      }, {} as any);
+    })
+  );
+}
+
+function NewTicketStepView({
+  ticketStepRepository,
+  stepRepository,
+  ticketRepository,
+  refreshed,
+}: {
+  ticketRepository: TicketRepository;
+  ticketStepRepository: TicketStepRepository;
   stepRepository: StepRepository;
+  refreshed: Date;
 }) {
-  const allSteps = useQuery<Step[]>(() => stepRepository.query({}).pipe(map(({data}: PaginatedResponse<Step>) => data)));
+  const allSteps = useQuery<{ [id: string]: Step }>(
+    stepRepository
+      .query({})
+      .pipe(map(({ data }) => reduceToMap((t) => t.id!.value, data))),
+      [refreshed]
+  );
+  const populatedSteps = useQuery<any>(
+    getStepGroupedTickets({ ticketRepository, ticketStepRepository }),
+    [refreshed]
+  );
 
-  const TicketsFor = ({step}: {step: Step}) => {
-    
-    const presentTicket = useCallback((ticket: Ticket) => {
-      return `# ${ticket.id!.value} - ${ticket.name}`;
-    }, []);
-    
-    const foundTicketSteps = useQuery<TicketStep[]>(() => ticketPopulator.getAllTicketStepsForStep(step.id!));
-
-    const allTickets = useQuery<Ticket[]>(() => ticketRepository.getAll());
-
-    return <List>
-      {step.name}
-      {foundTicketSteps?.filter(c => !c.checked).map((foundStep) => (
-      <ListItem>
-      {presentTicket(allTickets.find(c => c.id!.value === foundStep.ticketId!.value)!)}
-      </ListItem>
-      ))}
-    </List>
+  if (allSteps === undefined || populatedSteps === undefined) {
+    return <h2>Loading...</h2>;
   }
 
   return (
     <div>
       <List>
-        {allSteps ? 
-        allSteps.map((step) => <TicketsFor step={step}/>)
-        : <></>
-        }
+        {Object.keys(populatedSteps).map((stepId) => {
+          const step = allSteps[stepId];
+
+          const tickets = populatedSteps[stepId];
+
+          return (
+            <>
+              <ListItem>Step: {step.name}</ListItem>
+              <List style={{ marginLeft: 32 }}>
+                {tickets.map((ticket: Ticket) => (
+                  <ListItem>
+                    <ListItemText
+                      primary={
+                        "Ticket # " + ticket.id!.value + " - " + ticket.name
+                      }
+                      secondary="July 20, 2014"
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </>
+          );
+        })}
       </List>
     </div>
   );
 }
 
-function useQuery<T>(fetch: () => Observable<T>): T {
+function useQuery<T>(fetch: Observable<T>, deps=[] as any []): T {
   const [state, updateState] = useState(undefined as T);
 
-  const f = useCallback(fetch, [fetch]);
-
   useEffect(() => {
-    const subscription = f().subscribe((result) => {
+    const subscription = fetch.subscribe((result) => {
       updateState(result);
     });
 
     return () => subscription.unsubscribe();
-  }, [f]);
+  }, deps);
 
   return state;
 }

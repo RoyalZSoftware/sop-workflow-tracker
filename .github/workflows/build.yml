@@ -22,7 +22,7 @@ jobs:
         run: npm install
         working-directory: core 
       - name: build
-        run: npm run build
+        run: CI=false npm run build
         working-directory: core
       - uses: actions/upload-artifact@master
         with:

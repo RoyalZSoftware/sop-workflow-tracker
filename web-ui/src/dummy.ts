@@ -98,7 +98,9 @@ export class DummyTicketStepRepository extends BaseDummyRepository<TicketStep, T
     query(ticketStepFilter: TicketStepFilter): Observable<PaginatedResponse<TicketStep>> {
         return of({
             data: this.items.filter(c => {
-                return c.stepId!.value === ticketStepFilter.stepId!.value;
+                if (ticketStepFilter.stepId === undefined)
+                    return c;
+                return c.stepId?.value === ticketStepFilter.stepId?.value;
             }),
             hasMore: false,
         } as PaginatedResponse<TicketStep>);

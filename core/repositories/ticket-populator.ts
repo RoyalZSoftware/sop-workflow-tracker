@@ -1,4 +1,4 @@
-import { Observable, map, of, switchMap, zip } from "rxjs";
+import { BehaviorSubject, Observable, map, of, switchMap, zip } from "rxjs";
 import { Template } from "../models/template";
 import { Ticket, TicketId } from "../models/ticket";
 import { TicketRepository } from "./ticket-repository";
@@ -9,6 +9,7 @@ import { TicketStepRepository } from "./ticket-step-repository";
 export type PopulatedTicket = Omit<Ticket, 'ticketStepIds' | 'templateId'> & {ticketSteps: TicketStep[], template: Template};
 
 export class TicketPopulator {
+    
     constructor(private _ticketRepository: TicketRepository, private _ticketStepRepository: TicketStepRepository) { }
 
     populateFromId(ticketId: TicketId): Observable<PopulatedTicket | undefined> {

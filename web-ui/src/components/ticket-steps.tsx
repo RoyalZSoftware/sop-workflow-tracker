@@ -14,7 +14,7 @@ import {
   TicketStepId,
 } from "core";
 import { useState, useEffect, useCallback } from "react";
-import { Observable } from "rxjs";
+import { Observable, tap } from "rxjs";
 
 function TicketStepStateObserver({
   ticketSteps,
@@ -32,43 +32,63 @@ function TicketStepStateObserver({
       return prev;
     }, {} as any)
   );
-  return <>{ticketSteps.map((c) => (
-    <ListItem
-      secondaryAction={
-        <Checkbox
-          onChange={(e) => {
-            const checked = e.target.checked;
-            setCheckedState((prev: any) => ({
-              ...prev,
-              [c.id!.value]: checked,
-            }));
-            updateDatastore(c.id!, checked).subscribe().unsubscribe();
-          }}
-          checked={checkedState[c.id!.value]}
-        ></Checkbox>
-      }
-    >
-      <ListItemText primary={c.title} secondary={c.description} />
-    </ListItem>
-  ))}</>;
+
+  useEffect(() => {
+    setCheckedState(
+      ticketSteps.reduce((prev, curr) => {
+        prev[curr.id!.value] = curr.checked;
+        return prev;
+      }, {} as any)
+    );
+  }, [ticketSteps]);
+
+  return (
+    <>
+      {ticketSteps.map((c) => (
+        <ListItem
+          secondaryAction={
+            <Checkbox
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setCheckedState((prev: any) => ({
+                  ...prev,
+                  [c.id!.value]: checked,
+                }));
+                updateDatastore(c.id!, checked).subscribe().unsubscribe();
+              }}
+              checked={checkedState[c.id!.value]}
+            ></Checkbox>
+          }
+        >
+          <ListItemText primary={c.title} secondary={c.description} />
+        </ListItem>
+      ))}
+    </>
+  );
 }
 
 export function TicketSteps({
   ticket,
   ticketPopulator,
   ticketStepRepository,
+  setRefreshedAt
 }: {
   ticket: Ticket;
   ticketPopulator: TicketPopulator;
   ticketStepRepository: TicketStepRepository;
+  setRefreshedAt: any
 }) {
   const [populatedTicket, setPopulatedTicket] = useState(
     undefined as PopulatedTicket | undefined
   );
 
   const update = (ticketStepId: TicketStepId, checked: boolean) => {
-    return ticketStepRepository.update(ticketStepId, {checked});
-  }
+    return ticketStepRepository.update(ticketStepId, { checked }).pipe(
+      tap(() => {
+        setRefreshedAt(new Date());
+      })
+    );
+  };
 
   const fetch = useCallback(
     (x: Ticket) => {
@@ -89,8 +109,12 @@ export function TicketSteps({
 
   return (
     <List>
-      {(populatedTicket?.ticketSteps?.length ?? 0) > 0 ?  <TicketStepStateObserver updateDatastore={update} ticketSteps={populatedTicket!.ticketSteps}></TicketStepStateObserver>
-       : (
+      {(populatedTicket?.ticketSteps?.length ?? 0) > 0 ? (
+        <TicketStepStateObserver
+          updateDatastore={update}
+          ticketSteps={populatedTicket!.ticketSteps}
+        ></TicketStepStateObserver>
+      ) : (
         <Typography variant="body1">Keine Schritte gefunden</Typography>
       )}
     </List>
