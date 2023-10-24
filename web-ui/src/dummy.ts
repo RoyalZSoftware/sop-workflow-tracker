@@ -22,12 +22,12 @@ export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {val
     }
 
     baseGet(id: TId) {
-        console.log("Request for: " + id);
+        console.log("Request for: " + id.value + " " + this.localStorageKey);
         return this.items.find(c => c.id?.value === id.value);
     }
 
     baseGetAll() {
-        console.log("Get all");
+        console.log("Get all" + this.localStorageKey);
         return this.items;
     }
 

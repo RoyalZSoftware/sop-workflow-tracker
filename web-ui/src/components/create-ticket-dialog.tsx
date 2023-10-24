@@ -29,10 +29,6 @@ export default function CreateTicketDialog({
   const [ticketName, setTicketName] = useState('');
   const [selectedTemplate, selectTemplate] = useState(undefined as any as Template);
   useEffect(() => {
-    const subscription = templateRepository.getAll().subscribe((fetchedTemplates: Template[]) => {
-      setTemplates(fetchedTemplates);
-    })
-    return () => subscription.unsubscribe();
   }, [templateRepository]);
 
   const createTicketAndClose = () => {

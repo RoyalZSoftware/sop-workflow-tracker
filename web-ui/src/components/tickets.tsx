@@ -1,6 +1,5 @@
 import {
   Button,
-  Fab,
   Grid,
   List,
   ListItem,
@@ -17,12 +16,13 @@ import {
   TicketRepository,
   TicketStepRepository,
 } from "core";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { AppContext } from "../AppContext";
-import { Add } from "@mui/icons-material";
 import CreateTicketDialog from "./create-ticket-dialog";
 import { TicketSteps } from "./ticket-steps";
-import { Observable, map, zip } from "rxjs";
+import { map } from "rxjs";
+import { useQuery } from "../data-provider/use-query";
+import { getStepGroupedTickets, reduceToMap } from "../data-provider/grouped-ticket-steps";
 
 function TicketsList({
   selectTicket,
@@ -45,7 +45,7 @@ function TicketsList({
           onClick={() => onClick(ticket)}
           style={{ width: "100%" }}
         >
-          <ListItemText primary={ticket.name} secondary="July 20, 2014" />
+          <ListItemText primary={"# " + ticket.id!.value + " - " + ticket.name} />
         </ListItemButton>
       ))}
     </List>
@@ -91,22 +91,15 @@ export function TicketContext() {
     ticketBuilder,
     ticketStepRepository,
   } = useContext(AppContext);
-  const [tickets, setTickets] = useState([] as Ticket[]);
   const [selectedTicket, selectTicket] = useState(undefined as any as Ticket);
-  const [refreshedAt, setRefreshedAt] = useState(new Date());
-
-  const [isCreateTicketDialogOpen, setCreateTicketDialogOpen] = useState(false);
-
-  const fetch = useCallback(() => {
-    return ticketRepository
+  const [refreshedAt] = useState(new Date());
+  const tickets = useQuery<Ticket[]>(() =>
+    ticketRepository
       .getAll()
-      .subscribe((fetchedTickets: Ticket[]) => setTickets(fetchedTickets))
-      .unsubscribe();
-  }, [ticketRepository]);
+  );
 
-  useEffect(() => {
-    fetch();
-  }, [fetch, refreshedAt]);
+  if (tickets == undefined)
+    return <>Waiting</>;
 
   return (
     <Grid container spacing={2} style={{ height: "100%" }}>
@@ -121,24 +114,6 @@ export function TicketContext() {
             selectTicket={(ticket) => selectTicket(ticket)}
             tickets={tickets}
           ></TicketsList>
-          <Fab
-            onClick={() => setCreateTicketDialogOpen(true)}
-            color="primary"
-            size="medium"
-            style={{ position: "absolute", right: "32px", bottom: "32px" }}
-          >
-            <Add />
-          </Fab>
-          <CreateTicketDialog
-            ticketBuilder={ticketBuilder}
-            ticketRepository={ticketRepository}
-            templateRepository={templateRepository}
-            isOpen={isCreateTicketDialogOpen}
-            close={() => {
-              setRefreshedAt(new Date());
-              setCreateTicketDialogOpen(false);
-            }}
-          ></CreateTicketDialog>
         </Paper>
       </Grid>
       <Grid item xs={8}>
@@ -149,7 +124,6 @@ export function TicketContext() {
               ticketStepRepository={ticketStepRepository}
               ticketPopulator={ticketPopulator}
               ticket={selectedTicket}
-              setRefreshedAt={setRefreshedAt}
             ></TicketSteps>
           ) : (
             <Typography variant="body1">Kein Ticket ausgewählt.</Typography>
@@ -161,7 +135,7 @@ export function TicketContext() {
           <Typography variant="h4">New Ticket Step View</Typography>
           <NewTicketStepView
             ticketStepRepository={ticketStepRepository}
-            ticketRepository={ticketRepository}
+            tickets={tickets}
             stepRepository={stepRepository}
             refreshed={refreshedAt}
           />
@@ -171,61 +145,26 @@ export function TicketContext() {
   );
 }
 
-function reduceToMap<T>(mapKeyFactory: (t: T) => string, itemsArray: T[]) {
-  return itemsArray.reduce((prev, curr) => {
-    prev[mapKeyFactory(curr)] = curr;
-    return prev;
-  }, {} as { [key: string]: T });
-}
-
-function getStepGroupedTickets({
-  ticketStepRepository,
-  ticketRepository,
-}: {
-  ticketStepRepository: TicketStepRepository;
-  ticketRepository: TicketRepository;
-}): Observable<{ [stepId: string]: Ticket }> {
-  const allTicketSteps$ = ticketStepRepository
-    .query({})
-    .pipe(map(({ data }) => data));
-  const allTickets$ = ticketRepository
-    .getAll()
-    .pipe(
-      map((tickets: Ticket[]) =>
-        reduceToMap<Ticket>((t) => t.id!.value, tickets)
-      )
-    );
-
-  return zip(allTicketSteps$, allTickets$).pipe(
-    map(([ticketSteps, tickets]) => {
-      return ticketSteps.filter(c => !c.checked).reduce((prev, curr) => {
-        prev[curr.stepId!.value] ??= [];
-        prev[curr.stepId!.value].push(tickets[curr.ticketId!.value]);
-        return prev;
-      }, {} as any);
-    })
-  );
-}
 
 function NewTicketStepView({
   ticketStepRepository,
   stepRepository,
-  ticketRepository,
+  tickets,
   refreshed,
 }: {
-  ticketRepository: TicketRepository;
+  tickets: Ticket[];
   ticketStepRepository: TicketStepRepository;
   stepRepository: StepRepository;
   refreshed: Date;
 }) {
   const allSteps = useQuery<{ [id: string]: Step }>(
-    stepRepository
+    () => stepRepository
       .query({})
       .pipe(map(({ data }) => reduceToMap((t) => t.id!.value, data))),
-      [refreshed]
+    [refreshed]
   );
   const populatedSteps = useQuery<any>(
-    getStepGroupedTickets({ ticketRepository, ticketStepRepository }),
+    () => getStepGroupedTickets({ tickets, ticketStepRepository }),
     [refreshed]
   );
 
@@ -262,18 +201,4 @@ function NewTicketStepView({
       </List>
     </div>
   );
-}
-
-function useQuery<T>(fetch: Observable<T>, deps=[] as any []): T {
-  const [state, updateState] = useState(undefined as T);
-
-  useEffect(() => {
-    const subscription = fetch.subscribe((result) => {
-      updateState(result);
-    });
-
-    return () => subscription.unsubscribe();
-  }, deps);
-
-  return state;
 }

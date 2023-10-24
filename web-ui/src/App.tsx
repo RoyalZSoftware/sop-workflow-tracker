@@ -16,6 +16,7 @@ import {
 import { AppContext } from "./AppContext";
 import { TicketContext } from "./components/tickets";
 import { Navbar } from "./components/navbar";
+import { NinjaKeysProvider } from "./ninja-keys";
 
 function App() {
   const [stepRepository] = useState(new DummyStepRepository([
@@ -76,6 +77,7 @@ function App() {
         >
           <TicketContext></TicketContext>
         </AppContext.Provider>
+        <NinjaKeysProvider ticketRepository={ticketRepository} ticketBuilder={ticketBuilder} templateRepository={templateRepository}></NinjaKeysProvider>
       </div>
     </>
   );

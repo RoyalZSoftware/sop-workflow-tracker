@@ -71,23 +71,17 @@ export function TicketSteps({
   ticket,
   ticketPopulator,
   ticketStepRepository,
-  setRefreshedAt
 }: {
   ticket: Ticket;
   ticketPopulator: TicketPopulator;
   ticketStepRepository: TicketStepRepository;
-  setRefreshedAt: any
 }) {
   const [populatedTicket, setPopulatedTicket] = useState(
     undefined as PopulatedTicket | undefined
   );
 
   const update = (ticketStepId: TicketStepId, checked: boolean) => {
-    return ticketStepRepository.update(ticketStepId, { checked }).pipe(
-      tap(() => {
-        setRefreshedAt(new Date());
-      })
-    );
+    return ticketStepRepository.update(ticketStepId, { checked });
   };
 
   const fetch = useCallback(
