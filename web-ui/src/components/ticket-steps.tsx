@@ -14,7 +14,7 @@ import {
   TicketStepId,
 } from "core";
 import { useState, useEffect, useCallback } from "react";
-import { Observable, tap } from "rxjs";
+import { Observable } from "rxjs";
 
 function TicketStepStateObserver({
   ticketSteps,

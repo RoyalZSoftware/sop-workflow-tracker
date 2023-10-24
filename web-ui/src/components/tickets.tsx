@@ -18,7 +18,6 @@ import {
 } from "core";
 import { useContext, useState } from "react";
 import { AppContext } from "../AppContext";
-import CreateTicketDialog from "./create-ticket-dialog";
 import { TicketSteps } from "./ticket-steps";
 import { map } from "rxjs";
 import { useQuery } from "../data-provider/use-query";
@@ -87,8 +86,6 @@ export function TicketContext() {
     ticketRepository,
     stepRepository,
     ticketPopulator,
-    templateRepository,
-    ticketBuilder,
     ticketStepRepository,
   } = useContext(AppContext);
   const [selectedTicket, selectTicket] = useState(undefined as any as Ticket);
@@ -134,6 +131,8 @@ export function TicketContext() {
         <Paper elevation={1} style={{ padding: 32 }}>
           <Typography variant="h4">New Ticket Step View</Typography>
           <NewTicketStepView
+            selectTicket={selectTicket}
+            selectedTicket={selectedTicket}
             ticketStepRepository={ticketStepRepository}
             tickets={tickets}
             stepRepository={stepRepository}
@@ -151,11 +150,15 @@ function NewTicketStepView({
   stepRepository,
   tickets,
   refreshed,
+  selectTicket,
+  selectedTicket,
 }: {
   tickets: Ticket[];
   ticketStepRepository: TicketStepRepository;
   stepRepository: StepRepository;
   refreshed: Date;
+  selectTicket: (ticket: Ticket) => void;
+  selectedTicket: Ticket | undefined;
 }) {
   const allSteps = useQuery<{ [id: string]: Step }>(
     () => stepRepository
@@ -185,14 +188,14 @@ function NewTicketStepView({
               <ListItem>Step: {step.name}</ListItem>
               <List style={{ marginLeft: 32 }}>
                 {tickets.map((ticket: Ticket) => (
-                  <ListItem>
+                  <ListItemButton onClick={() => selectTicket(ticket)} selected={selectedTicket == ticket}>
                     <ListItemText
                       primary={
                         "Ticket # " + ticket.id!.value + " - " + ticket.name
                       }
                       secondary="July 20, 2014"
                     />
-                  </ListItem>
+                  </ListItemButton>
                 ))}
               </List>
             </>
