@@ -1,8 +1,11 @@
 import {
+  Box,
   Button,
+  Card,
+  CardContent,
+  Divider,
   Grid,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   Paper,
@@ -16,7 +19,7 @@ import {
   TicketRepository,
   TicketStepRepository,
 } from "@sop-workflow-tracker/core";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useState } from "react";
 import { AppContext } from "../AppContext";
 import { TicketSteps } from "./ticket-steps";
 import { map } from "rxjs";
@@ -104,12 +107,25 @@ export function TicketContext() {
 
   return (
     <Grid container spacing={2} style={{ height: "100%" }}>
+      <Grid item xs={12}>
+        <Paper elevation={1} style={{ padding: 32 }}>
+          <Typography variant="h6">New Ticket Step View</Typography>
+          <NewTicketStepView
+            selectTicket={selectTicket}
+            selectedTicket={selectedTicket}
+            ticketStepRepository={ticketStepRepository}
+            tickets={tickets}
+            stepRepository={stepRepository}
+            refreshed={refreshedAt}
+          />
+        </Paper>
+      </Grid>
       <Grid item xs={4} style={{ height: "100%" }}>
         <Paper
           elevation={1}
           style={{ height: "100%", position: "relative", padding: 32 }}
         >
-          <Typography variant="h4">Tickets</Typography>
+          <Typography variant="h6">Tickets</Typography>
           <TicketsList
             selectedTicket={selectedTicket}
             selectTicket={(ticket) => selectTicket(ticket)}
@@ -119,32 +135,19 @@ export function TicketContext() {
       </Grid>
       <Grid item xs={8}>
         <Paper elevation={1} style={{ padding: 32 }}>
-          <Typography variant="h4">Steps</Typography>
+          <Typography variant="h6">Steps</Typography>
           {selectedTicket !== undefined ? (
             <>
-            <TicketSteps
-              ticketStepRepository={ticketStepRepository}
-              ticketPopulator={ticketPopulator}
-              ticket={selectedTicket}
-            ></TicketSteps>
-            {pluginManager.RenderAll('ticket_details', {ticket: selectedTicket})}
+              <TicketSteps
+                ticketStepRepository={ticketStepRepository}
+                ticketPopulator={ticketPopulator}
+                ticket={selectedTicket}
+              ></TicketSteps>
+              {pluginManager.RenderAll('ticket_details', { ticket: selectedTicket })}
             </>
           ) : (
             <Typography variant="body1">Kein Ticket ausgewählt.</Typography>
           )}
-        </Paper>
-      </Grid>
-      <Grid item xs={12}>
-        <Paper elevation={1} style={{ padding: 32 }}>
-          <Typography variant="h4">New Ticket Step View</Typography>
-          <NewTicketStepView
-            selectTicket={selectTicket}
-            selectedTicket={selectedTicket}
-            ticketStepRepository={ticketStepRepository}
-            tickets={tickets}
-            stepRepository={stepRepository}
-            refreshed={refreshedAt}
-          />
         </Paper>
       </Grid>
     </Grid>
@@ -183,32 +186,28 @@ function NewTicketStepView({
   }
 
   return (
-    <div>
-      <List>
-        {Object.keys(populatedSteps).map((stepId) => {
-          const step = allSteps[stepId];
+    <Box style={{ overflow: 'auto', display: 'flex' }}>
+      {Object.keys(populatedSteps).map((stepId) => {
+        const step = allSteps[stepId];
 
-          const tickets = populatedSteps[stepId];
+        const tickets = populatedSteps[stepId];
 
-          return (
-            <>
-              <ListItem>Step: {step.name}</ListItem>
-              <List style={{ marginLeft: 32 }}>
-                {tickets.map((ticket: Ticket) => (
-                  <ListItemButton onClick={() => selectTicket(ticket)} selected={selectedTicket == ticket}>
-                    <ListItemText
-                      primary={
-                        "Ticket # " + ticket.id!.value + " - " + ticket.name
-                      }
-                      secondary="July 20, 2014"
-                    />
-                  </ListItemButton>
-                ))}
-              </List>
-            </>
-          );
-        })}
-      </List>
-    </div>
+        return (
+          <Box style={{ width: '300px', flexShrink: '0', marginRight: 8 }}>
+            <Typography variant="h6" style={{ textOverflow: 'truncate', overflow: 'hidden' }}>{step.name}</Typography>
+            <Divider style={{ marginBottom: 8, marginTop: 4 }} />
+
+            {tickets.map((ticket: Ticket) => (
+              <Card style={{ marginBottom: 8 }} onClick={() => selectTicket(ticket)}>
+                <CardContent>
+                  {ticket.id!.value + ' - ' + ticket.name}
+                </CardContent>
+
+              </Card>
+            ))}
+          </Box>
+        );
+      })}
+    </Box>
   );
 }

@@ -28,7 +28,7 @@ export class CommentListTicketDetailsView extends TicketDetailsPluginView {
                 })
             }, [refreshed]);
             return <>
-                <h1>Comments for: {ticket?.name}</h1>
+                <h6>Comments for: {ticket?.name}</h6>
                 <input type="text" value={commentContent} onChange={(e) => setCommentContent(e.target.value)} placeholder="Create new comment" />
                 <button onClick={() => createComment()}>Erstellen</button>
                 <ul>
