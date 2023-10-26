@@ -1,40 +1,24 @@
-import { Typography } from "@mui/material";
-import { Ticket, TicketRepository } from "core";
-import { useEffect, useState } from "react";
-import { Plugin, ViewType } from "react-plugin-engine";
+import { PopulatedTicket } from "core";
+import { Plugin, TicketDetailsPluginView } from "react-plugin-engine";
 
-const comments: {[key: string]: string[]} = {
+const comments: { [key: string]: string[] } = {
     '0': ['Hallo', 'Welt', 'Das ist ein Kommentar'],
-    '3': ['Hallo', 'Welt', 'Das ist ein Kommentar'],
+    '3': ['Das sind die Kommentare', 'von Ticket nummer 3'],
 };
 
-function RenderComments({ ticketRepository }: { ticketRepository: TicketRepository }) {
-    const [tickets, setTickets] = useState<Ticket[]>([]);
-
-    useEffect(() => {
-        return () => ticketRepository.getAll().subscribe((fetched) => setTickets(fetched)).unsubscribe();
-    }, []);
-
-    return <>
-    <Typography variant="h4">Comments</Typography>
-    <ul>
-        {tickets.map((c) => (<li>
-            {c.name}
-            <ul>
-            {(comments[c.id!.value]?? []).map(comment => (
-                <li>comment</li>
+class CommentsList extends TicketDetailsPluginView {
+    render({ ticket }: { ticket: PopulatedTicket }) {
+        return <ul>
+            {(comments[ticket?.id!.value] ?? []).map(comment => (
+                <li>{comment}</li>
             ))}
-</ul>
-            </li>))}
-    </ul>
-    </>
+        </ul>
+    }
 }
 
 export class CommentsPlugin extends Plugin {
     constructor() {
         super('comments');
-        this.registerView(ViewType.TICKET_DETAILS, (dependencies: any) => {
-            return <RenderComments ticketRepository={dependencies.ticketRepository}/>
-        });
+        this.registerView(new CommentsList());
     }
 }

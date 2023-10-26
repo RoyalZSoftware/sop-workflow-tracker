@@ -1,18 +1,15 @@
 import React from "react";
+import { PluginView } from "./internal/plugin-view-base";
 import { Plugin } from "./plugin";
-import { ViewType, PluginView } from "./plugin-view";
 
 export class PluginManager {
     protected readonly plugins: Plugin[] = [];
-
-    constructor() {
-    }
 
     public registerPlugin(plugin: Plugin) {
         this.plugins.push(plugin);
     }
 
-    RenderAll(viewType: ViewType, dependencies: any): React.JSX.Element {
+    RenderAll(viewType: string, dependencies: any): React.JSX.Element {
         const viewsOfViewType = this._getAllViewsForAllPlugins().filter(c => c.viewType == viewType);
         return <>
             {viewsOfViewType.map(c => (c.render(dependencies)))}

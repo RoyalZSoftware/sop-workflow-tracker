@@ -22,7 +22,7 @@ import { TicketSteps } from "./ticket-steps";
 import { map } from "rxjs";
 import { useQuery } from "../data-provider/use-query";
 import { getStepGroupedTickets, reduceToMap } from "../data-provider/grouped-ticket-steps";
-import { PluginManager, ViewType, EvernotePlugin } from 'react-plugin-engine';
+import { PluginManager } from 'react-plugin-engine';
 import { CommentsPlugin } from "./comments-plugin";
 
 function TicketsList({
@@ -98,7 +98,7 @@ export function TicketContext() {
   );
   const pluginManager = new PluginManager();
   pluginManager.registerPlugin(new CommentsPlugin());
-  const Component = useMemo(() => pluginManager.RenderAll(ViewType.TICKET_DETAILS, {ticketRepository}), []);
+  const Component = useMemo(() => pluginManager.RenderAll('ticket_details', {ticket: selectedTicket}), [selectedTicket]);
 
   if (tickets == undefined)
     return <>Waiting</>;
@@ -116,18 +116,20 @@ export function TicketContext() {
             selectTicket={(ticket) => selectTicket(ticket)}
             tickets={tickets}
           ></TicketsList>
-          {Component}
         </Paper>
       </Grid>
       <Grid item xs={8}>
         <Paper elevation={1} style={{ padding: 32 }}>
           <Typography variant="h4">Steps</Typography>
           {selectedTicket !== undefined ? (
+            <>
             <TicketSteps
               ticketStepRepository={ticketStepRepository}
               ticketPopulator={ticketPopulator}
               ticket={selectedTicket}
             ></TicketSteps>
+            {Component}
+            </>
           ) : (
             <Typography variant="body1">Kein Ticket ausgewählt.</Typography>
           )}

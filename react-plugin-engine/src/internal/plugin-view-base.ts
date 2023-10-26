@@ -1,8 +1,4 @@
-export enum ViewType {
-    TICKET_DETAILS
-}
-
 export interface PluginView<Dependencies> {
-    viewType: ViewType;
+    viewType: string;
     render: (dependencies: Dependencies) => React.JSX.Element;
 }
