@@ -18,6 +18,7 @@
     "ninja-keys": "^1.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-plugin-engine": "file:../react-plugin-engine",
     "react-scripts": "5.0.1",
     "rxjs": "^7.8.1",
     "typescript": "^4.9.5",

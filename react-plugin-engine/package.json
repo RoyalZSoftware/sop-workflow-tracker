@@ -1,0 +1,28 @@
+{
+  "name": "react-plugin-engine",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsup"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "react": "*"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "core": "file:../core"
+  }
+}

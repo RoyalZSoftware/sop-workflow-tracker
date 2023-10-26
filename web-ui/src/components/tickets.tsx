@@ -16,12 +16,14 @@ import {
   TicketRepository,
   TicketStepRepository,
 } from "core";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../AppContext";
 import { TicketSteps } from "./ticket-steps";
 import { map } from "rxjs";
 import { useQuery } from "../data-provider/use-query";
 import { getStepGroupedTickets, reduceToMap } from "../data-provider/grouped-ticket-steps";
+import { PluginManager, ViewType, EvernotePlugin } from 'react-plugin-engine';
+import { CommentsPlugin } from "./comments-plugin";
 
 function TicketsList({
   selectTicket,
@@ -94,6 +96,9 @@ export function TicketContext() {
     ticketRepository
       .getAll()
   );
+  const pluginManager = new PluginManager();
+  pluginManager.registerPlugin(new CommentsPlugin());
+  const Component = useMemo(() => pluginManager.RenderAll(ViewType.TICKET_DETAILS, {ticketRepository}), []);
 
   if (tickets == undefined)
     return <>Waiting</>;
@@ -111,6 +116,7 @@ export function TicketContext() {
             selectTicket={(ticket) => selectTicket(ticket)}
             tickets={tickets}
           ></TicketsList>
+          {Component}
         </Paper>
       </Grid>
       <Grid item xs={8}>
