@@ -12,7 +12,7 @@ import {
   TicketStepRepository,
   TicketStep,
   TicketStepId,
-} from "core";
+} from "@sop-workflow-tracker/core";
 import { useState, useEffect, useCallback } from "react";
 import { Observable } from "rxjs";
 

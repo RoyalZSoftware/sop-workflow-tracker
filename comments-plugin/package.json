@@ -1,28 +1,26 @@
 {
-  "name": "@sop-workflow-tracker/react-plugin-engine",
+  "name": "comments-plugin",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "tsc": "tsc",
-    "build": "tsup"
+    "tsc": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "tsup": "^7.2.0",
+    "@types/react": "^18.2.33",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
-    "@types/react": "^18",
-    "react": "^18"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
-  "files": [
-    "dist"
-  ],
   "dependencies": {
-    "@sop-workflow-tracker/core": "file:../core"
+    "@sop-workflow-tracker/core": "file:../core",
+    "@sop-workflow-tracker/react-plugin-engine": "file:../react-plugin-engine",
+    "rxjs": "^7.8.1"
   }
 }

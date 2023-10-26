@@ -1,9 +1,7 @@
-import { Template, TemplateRepository, TicketBuilder, TicketRepository } from 'core';
+import { Template, TemplateRepository, TicketBuilder, TicketRepository } from '@sop-workflow-tracker/core';
 import 'ninja-keys';
 import { NinjaKeys } from 'ninja-keys';
-import { take } from 'rxjs/operators';
-import React, { useEffect, useRef, useState } from 'react';
-import { Observable } from 'rxjs';
+import React, { useEffect, useRef } from 'react';
 import { useQuery } from './data-provider/use-query';
 
 declare global {

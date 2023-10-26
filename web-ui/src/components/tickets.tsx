@@ -15,15 +15,15 @@ import {
   Ticket,
   TicketRepository,
   TicketStepRepository,
-} from "core";
+} from "@sop-workflow-tracker/core";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../AppContext";
 import { TicketSteps } from "./ticket-steps";
 import { map } from "rxjs";
 import { useQuery } from "../data-provider/use-query";
 import { getStepGroupedTickets, reduceToMap } from "../data-provider/grouped-ticket-steps";
-import { PluginManager } from 'react-plugin-engine';
-import { CommentsPlugin } from "./comments-plugin";
+import { PluginManager } from '@sop-workflow-tracker/react-plugin-engine';
+import { CommentsPlugin } from "@sop-workflow-tracker/comments-plugin";
 
 function TicketsList({
   selectTicket,
@@ -97,8 +97,7 @@ export function TicketContext() {
       .getAll()
   );
   const pluginManager = new PluginManager();
-  pluginManager.registerPlugin(new CommentsPlugin());
-  const Component = useMemo(() => pluginManager.RenderAll('ticket_details', {ticket: selectedTicket}), [selectedTicket]);
+  pluginManager.registerPlugin(new CommentsPlugin())
 
   if (tickets == undefined)
     return <>Waiting</>;
@@ -128,7 +127,7 @@ export function TicketContext() {
               ticketPopulator={ticketPopulator}
               ticket={selectedTicket}
             ></TicketSteps>
-            {Component}
+            {pluginManager.RenderAll('ticket_details', {ticket: selectedTicket})}
             </>
           ) : (
             <Typography variant="body1">Kein Ticket ausgewählt.</Typography>

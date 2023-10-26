@@ -1,4 +1,4 @@
-import { PopulatedTicket, Ticket, TicketRepository } from "core";
+import { PopulatedTicket, Ticket, TicketRepository } from "@sop-workflow-tracker/core";
 import { JSX } from "react";
 import { PluginView } from "./internal/plugin-view-base";
 

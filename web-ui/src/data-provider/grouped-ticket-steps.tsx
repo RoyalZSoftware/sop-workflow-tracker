@@ -1,4 +1,4 @@
-import { TicketStepRepository, Ticket, TicketStep } from "core";
+import { TicketStepRepository, Ticket, TicketStep } from "@sop-workflow-tracker/core";
 import { Observable, map, zip, of } from "rxjs";
 
 export function reduceToMap<T>(mapKeyFactory: (t: T) => string, itemsArray: T[]) {

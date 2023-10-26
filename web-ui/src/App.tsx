@@ -6,7 +6,7 @@ import {
   TemplateId,
   TicketBuilder,
   TicketPopulator,
-} from "core";
+} from "@sop-workflow-tracker/core";
 import {
   DummyStepRepository,
   DummyTemplateRepository,

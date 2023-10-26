@@ -1,10 +1,10 @@
 import { Observable, of } from "rxjs";
-import { StepId, Step, TemplateId, Template, TicketStepFilter, StepRepositoryFilter } from "core";
-import { Ticket, TicketId, TicketStep, TicketStepId, TicketStepRepository } from "core";
-import { StepRepository } from "core";
-import { TicketFilter, TicketRepository } from "core";
-import { TemplateRepository } from "core";
-import { PaginatedResponse } from "core/repositories/paginated-resource";
+import { StepId, Step, TemplateId, Template, TicketStepFilter, StepRepositoryFilter } from "@sop-workflow-tracker/core";
+import { Ticket, TicketId, TicketStep, TicketStepId, TicketStepRepository } from "@sop-workflow-tracker/core";
+import { StepRepository } from "@sop-workflow-tracker/core";
+import { TicketFilter, TicketRepository } from "@sop-workflow-tracker/core";
+import { TemplateRepository } from "@sop-workflow-tracker/core";
+import { PaginatedResponse } from "@sop-workflow-tracker/core/repositories/paginated-resource";
 
 export abstract class BaseDummyRepository<T extends {id?: TId}, TId extends {value: string}> {
     constructor(public items: T[] = [], public localStorageKey: string) {

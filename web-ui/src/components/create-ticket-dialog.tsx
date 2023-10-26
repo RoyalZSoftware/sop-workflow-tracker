@@ -10,7 +10,7 @@ import {
   InputLabel,
   TextField,
 } from "@mui/material";
-import { Template, TemplateRepository, Ticket, TicketBuilder, TicketRepository } from "core";
+import { Template, TemplateRepository, Ticket, TicketBuilder, TicketRepository } from "@sop-workflow-tracker/core";
 import { useEffect, useState } from "react";
 
 export default function CreateTicketDialog({

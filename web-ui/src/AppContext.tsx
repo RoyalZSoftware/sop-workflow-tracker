@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import {
   StepRepository, TemplateRepository, TicketBuilder, TicketPopulator, TicketRepository, TicketStepRepository
-} from "core";
+} from "@sop-workflow-tracker/core";
 
 
 export const AppContext = createContext({
