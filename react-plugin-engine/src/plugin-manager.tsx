@@ -3,7 +3,7 @@ import { PluginView } from "./internal/plugin-view-base";
 import { Plugin } from "./plugin";
 
 export class PluginManager {
-    protected readonly plugins: Plugin[] = [];
+    public readonly plugins: Plugin[] = [];
 
     public registerPlugin(plugin: Plugin) {
         this.plugins.push(plugin);

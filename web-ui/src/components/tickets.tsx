@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import {
+  PopulatedTicket,
   Step,
   StepRepository,
   Ticket,
@@ -27,6 +28,7 @@ import { getStepGroupedTickets, reduceToMap } from "../data-provider/grouped-tic
 import { Board } from "./kanban-board/card-list";
 import { NinjaKeysProvider } from "../ninja-keys";
 import { Fullscreen } from "@mui/icons-material";
+import { TicketDetailsPluginView} from '@sop-workflow-tracker/react-plugin-engine'
 
 
 interface TabPanelProps {
@@ -108,7 +110,8 @@ export function TicketContext() {
     ticketPopulator,
     ticketStepRepository,
     ticketBuilder,
-    templateRepository
+    templateRepository,
+    pluginManager,
   } = useContext(AppContext);
   const [selectedTicket, selectTicket] = useState(undefined as any as Ticket);
   const [refreshedAt, setRefreshed] = useState(new Date());
@@ -119,6 +122,9 @@ export function TicketContext() {
   );
 
   const [selectedTab, setSelectedTab] = useState('0');
+  const [selectedDetailsTab, setSelectedDetailsTab] = useState('0');
+
+  const [plugins] = useState(pluginManager.plugins);
 
   if (tickets == undefined)
     return <>Waiting</>;
@@ -163,15 +169,27 @@ export function TicketContext() {
             </Grid>
             <Grid item xs={6} style={{ height: '50%' }}>
               <Paper elevation={1} style={{ padding: 32, maxHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="h6">Steps</Typography>
+                <Tabs value={selectedDetailsTab} onChange={(_, v) => setSelectedDetailsTab(v)}>
+                  <Tab label="Steps" value="0"></Tab>
+                  {plugins.map((plugin: any) => (<Tab label={plugin.id} value={plugin.id}></Tab>))}
+                </Tabs>
                 {selectedTicket !== undefined ? (
                   <>
-                    <TicketSteps
-                      ticketStepRepository={ticketStepRepository}
-                      ticketPopulator={ticketPopulator}
-                      ticket={selectedTicket}
-                      setRefreshed={setRefreshed}
-                    ></TicketSteps>
+                    <CustomTabPanel value={selectedDetailsTab} index={'0'}>
+                      <TicketSteps
+                        ticketStepRepository={ticketStepRepository}
+                        ticketPopulator={ticketPopulator}
+                        ticket={selectedTicket}
+                        setRefreshed={setRefreshed}
+                      ></TicketSteps>
+                    </CustomTabPanel>
+                    {plugins.map((plugin: any) => (
+                    <CustomTabPanel value={selectedDetailsTab} index={plugin.id}>
+                      <div style={{ overflowY: 'auto' }}>
+                        {plugin.registeredViews.filter((c: any) => c.viewType === 'ticket_details').map((view: TicketDetailsPluginView) => view.render({ticket: selectedTicket as any as PopulatedTicket}))}
+                      </div>
+                    </CustomTabPanel>
+                    ))}
                   </>
                 ) : (
                   <Typography variant="body1">Kein Ticket ausgewählt.</Typography>
@@ -225,8 +243,6 @@ function NewTicketStepView({
       items: populatedSteps[stepId],
     }
   })
-
-  const states = [{ id: 'open', title: 'Open' }, { id: 'closed', title: 'Closed' }];
 
   return <>
     <Board selectedTicket={selectedTicket} onCardClick={(card) => selectTicket(card)} cardLists={data}></Board>
