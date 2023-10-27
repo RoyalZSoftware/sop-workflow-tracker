@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Observable, of } from 'rxjs';
 import { Plugin, TicketDetailsPluginView } from '@sop-workflow-tracker/react-plugin-engine';
 import { PopulatedTicket, TicketId } from '@sop-workflow-tracker/core';
+import { Button, Input, List, ListItem, Typography } from '@mui/material';
 
 export class CommentListTicketDetailsView extends TicketDetailsPluginView {
     constructor(private _commentsRepository: CommentsRepository) {
@@ -28,12 +29,11 @@ export class CommentListTicketDetailsView extends TicketDetailsPluginView {
                 })
             }, [refreshed]);
             return <>
-                <h6>Comments for: {ticket?.name}</h6>
-                <input type="text" value={commentContent} onChange={(e) => setCommentContent(e.target.value)} placeholder="Create new comment" />
-                <button onClick={() => createComment()}>Erstellen</button>
-                <ul>
-                    {comments.map(c => (<li>{c.content}</li>))}
-                </ul>
+                <Input type="text" value={commentContent} onChange={(e) => setCommentContent(e.target.value)} placeholder="Create new comment" />
+                <Button onClick={() => createComment()}>Erstellen</Button>
+                <List>
+                    {comments.map(c => (<ListItem>{c.content}</ListItem>))}
+                </List>
             </>;
         }
         return <Component />

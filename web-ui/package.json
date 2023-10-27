@@ -11,6 +11,7 @@
     "@mui/material": "^5.14.14",
     "@sop-workflow-tracker/comments-plugin": "file:../comments-plugin",
     "@sop-workflow-tracker/core": "file:../core",
+    "@sop-workflow-tracker/images-plugin": "file:../images-plugin",
     "@sop-workflow-tracker/react-plugin-engine": "file:../react-plugin-engine",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
