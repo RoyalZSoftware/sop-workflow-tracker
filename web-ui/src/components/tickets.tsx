@@ -1,10 +1,13 @@
 import {
+  Box,
   Button,
   Grid,
   List,
   ListItemButton,
   ListItemText,
   Paper,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -24,6 +27,21 @@ import { getStepGroupedTickets, reduceToMap } from "../data-provider/grouped-tic
 import { Board } from "./kanban-board/card-list";
 import { NinjaKeysProvider } from "../ninja-keys";
 import { Fullscreen } from "@mui/icons-material";
+
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: string;
+  value: string;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  if (value === index)
+    return <>{children}</>;
+  return (<></>);
+}
 
 function TicketsList({
   selectTicket,
@@ -100,6 +118,8 @@ export function TicketContext() {
       .getAll()
   );
 
+  const [selectedTab, setSelectedTab] = useState('0');
+
   if (tickets == undefined)
     return <>Waiting</>;
 
@@ -108,17 +128,27 @@ export function TicketContext() {
       <Grid container spacing={2} style={{ height: "100%" }}>
         <Grid item xs={12} style={{ transition: '0.15s all', height: kanbanFullScreen ? '100%' : '50%' }}>
           <Paper style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 8, position: 'relative' }}>
-            <Fullscreen onClick={() => setKanbanFullScreen(!kanbanFullScreen)} style={{ cursor: 'pointer', position: 'absolute', top: 16, right: 16 }} />
-            <Typography variant="h5" style={{ margin: 8 }}>Tickets</Typography>
-
-            <NewTicketStepView
-              selectTicket={selectTicket}
-              selectedTicket={selectedTicket}
-              ticketStepRepository={ticketStepRepository}
-              tickets={tickets}
-              stepRepository={stepRepository}
-              refreshed={refreshedAt}
-            />
+            <Fullscreen onClick={() => setKanbanFullScreen(!kanbanFullScreen)} style={{ cursor: 'pointer', zIndex: 400, position: 'absolute', top: 16, right: 16 }} />
+            <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
+              <Tab label="By State" value="0"></Tab>
+              <Tab label="By Steps" value="1"></Tab>
+            </Tabs>
+            <CustomTabPanel value={selectedTab} index={'0'}>
+              <Board selectedTicket={selectedTicket} onCardClick={(card) => selectTicket(card)} cardLists={[{ title: 'Open', id: 'open' }, { title: 'Closed', id: 'closed' }].map(c => ({
+                title: c.title,
+                items: tickets.filter(ticket => ticket.ticketState == c.id)
+              }))}></Board>
+            </CustomTabPanel>
+            <CustomTabPanel value={selectedTab} index={'1'}>
+              <NewTicketStepView
+                selectTicket={selectTicket}
+                selectedTicket={selectedTicket}
+                ticketStepRepository={ticketStepRepository}
+                tickets={tickets}
+                stepRepository={stepRepository}
+                refreshed={refreshedAt}
+              />
+            </CustomTabPanel>
           </Paper>
         </Grid>
         {kanbanFullScreen ? <></> :
@@ -200,9 +230,5 @@ function NewTicketStepView({
 
   return <>
     <Board selectedTicket={selectedTicket} onCardClick={(card) => selectTicket(card)} cardLists={data}></Board>
-    <Board selectedTicket={selectedTicket} onCardClick={(card) => selectTicket(card)} cardLists={states.map(c => ({
-      title: c.title,
-      items: tickets.filter(ticket => ticket.ticketState == c.id)
-    }))}></Board>
   </>
 }
