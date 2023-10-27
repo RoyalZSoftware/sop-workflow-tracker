@@ -8,6 +8,6 @@ export function useQuery<T>(cb: () => Observable<T>, deps: any[] = []) {
     return () => cb().subscribe((fetchedData) => {
       updateState(fetchedData);
     }).unsubscribe();
-  }, []);
+  }, deps);
   return state;
 }

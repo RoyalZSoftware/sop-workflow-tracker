@@ -3,13 +3,20 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { PluginManager } from '@sop-workflow-tracker/react-plugin-engine';
+import { CommentsPlugin } from '@sop-workflow-tracker/comments-plugin';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+const pluginManager = new PluginManager();
+
+pluginManager.registerPlugin(new CommentsPlugin());
+
 root.render(
   <React.StrictMode>
-    <App />
+    <App pluginManager={pluginManager}/>
   </React.StrictMode>
 );
 

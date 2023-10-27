@@ -1,9 +1,5 @@
 import {
-  Box,
   Button,
-  Card,
-  CardContent,
-  Divider,
   Grid,
   List,
   ListItemButton,
@@ -25,8 +21,9 @@ import { TicketSteps } from "./ticket-steps";
 import { map } from "rxjs";
 import { useQuery } from "../data-provider/use-query";
 import { getStepGroupedTickets, reduceToMap } from "../data-provider/grouped-ticket-steps";
-import { PluginManager } from '@sop-workflow-tracker/react-plugin-engine';
-import { CommentsPlugin } from "@sop-workflow-tracker/comments-plugin";
+import { Board } from "./kanban-board/card-list";
+import { NinjaKeysProvider } from "../ninja-keys";
+import { Fullscreen } from "@mui/icons-material";
 
 function TicketsList({
   selectTicket,
@@ -42,7 +39,7 @@ function TicketsList({
   };
 
   return (
-    <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
+    <List sx={{ width: "100%", maxHeight: '100%', overflowY: 'auto' }}>
       {tickets.map((ticket) => (
         <ListItemButton
           selected={selectedTicket === ticket}
@@ -92,65 +89,71 @@ export function TicketContext() {
     stepRepository,
     ticketPopulator,
     ticketStepRepository,
+    ticketBuilder,
+    templateRepository
   } = useContext(AppContext);
   const [selectedTicket, selectTicket] = useState(undefined as any as Ticket);
-  const [refreshedAt] = useState(new Date());
+  const [refreshedAt, setRefreshed] = useState(new Date());
+  const [kanbanFullScreen, setKanbanFullScreen] = useState(false);
   const tickets = useQuery<Ticket[]>(() =>
     ticketRepository
       .getAll()
   );
-  const pluginManager = new PluginManager();
-  pluginManager.registerPlugin(new CommentsPlugin())
 
   if (tickets == undefined)
     return <>Waiting</>;
 
   return (
-    <Grid container spacing={2} style={{ height: "100%" }}>
-      <Grid item xs={12}>
-        <Paper elevation={1} style={{ padding: 32 }}>
-          <Typography variant="h6">New Ticket Step View</Typography>
-          <NewTicketStepView
-            selectTicket={selectTicket}
-            selectedTicket={selectedTicket}
-            ticketStepRepository={ticketStepRepository}
-            tickets={tickets}
-            stepRepository={stepRepository}
-            refreshed={refreshedAt}
-          />
-        </Paper>
+    <div style={{ height: '100%', padding: 32 }}>
+      <Grid container spacing={2} style={{ height: "100%" }}>
+        <Grid item xs={12} style={{ transition: '0.15s all', height: kanbanFullScreen ? '100%' : '50%' }}>
+          <Paper style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 8, position: 'relative' }}>
+            <Fullscreen onClick={() => setKanbanFullScreen(!kanbanFullScreen)} style={{ cursor: 'pointer', position: 'absolute', top: 16, right: 16 }} />
+            <Typography variant="h5" style={{ margin: 8 }}>Tickets</Typography>
+
+            <NewTicketStepView
+              selectTicket={selectTicket}
+              selectedTicket={selectedTicket}
+              ticketStepRepository={ticketStepRepository}
+              tickets={tickets}
+              stepRepository={stepRepository}
+              refreshed={refreshedAt}
+            />
+          </Paper>
+        </Grid>
+        {kanbanFullScreen ? <></> :
+          <>
+            <Grid item xs={6} style={{ height: "50%" }}>
+              <Paper
+                elevation={1}
+                style={{ height: "100%", position: "relative" }}
+              >
+                <TicketsList selectTicket={selectTicket} selectedTicket={selectedTicket} tickets={tickets} />
+              </Paper>
+            </Grid>
+            <Grid item xs={6} style={{ height: '50%' }}>
+              <Paper elevation={1} style={{ padding: 32, maxHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="h6">Steps</Typography>
+                {selectedTicket !== undefined ? (
+                  <>
+                    <TicketSteps
+                      ticketStepRepository={ticketStepRepository}
+                      ticketPopulator={ticketPopulator}
+                      ticket={selectedTicket}
+                      setRefreshed={setRefreshed}
+                    ></TicketSteps>
+                  </>
+                ) : (
+                  <Typography variant="body1">Kein Ticket ausgewählt.</Typography>
+                )}
+              </Paper>
+            </Grid>
+
+          </>
+        }
       </Grid>
-      <Grid item xs={4} style={{ height: "100%" }}>
-        <Paper
-          elevation={1}
-          style={{ height: "100%", position: "relative", padding: 32 }}
-        >
-          <Typography variant="h6">Tickets</Typography>
-          <TicketsList
-            selectedTicket={selectedTicket}
-            selectTicket={(ticket) => selectTicket(ticket)}
-            tickets={tickets}
-          ></TicketsList>
-        </Paper>
-      </Grid>
-      <Grid item xs={8}>
-        <Paper elevation={1} style={{ padding: 32 }}>
-          <Typography variant="h6">Steps</Typography>
-          {selectedTicket !== undefined ? (
-            <>
-              <TicketSteps
-                ticketStepRepository={ticketStepRepository}
-                ticketPopulator={ticketPopulator}
-                ticket={selectedTicket}
-              ></TicketSteps>
-              {pluginManager.RenderAll('ticket_details', { ticket: selectedTicket })}
-            </>
-          ) : (
-            <Typography variant="body1">Kein Ticket ausgewählt.</Typography>
-          )}
-        </Paper>
-      </Grid>
-    </Grid>
+      <NinjaKeysProvider setRefreshedAt={setRefreshed} ticketBuilder={ticketBuilder} templateRepository={templateRepository}></NinjaKeysProvider>
+    </div>
   );
 }
 
@@ -161,7 +164,7 @@ function NewTicketStepView({
   tickets,
   refreshed,
   selectTicket,
-  selectedTicket,
+  selectedTicket
 }: {
   tickets: Ticket[];
   ticketStepRepository: TicketStepRepository;
@@ -185,29 +188,21 @@ function NewTicketStepView({
     return <h2>Loading...</h2>;
   }
 
-  return (
-    <Box style={{ overflow: 'auto', display: 'flex' }}>
-      {Object.keys(populatedSteps).map((stepId) => {
-        const step = allSteps[stepId];
+  const data = Object.keys(populatedSteps).map(stepId => {
+    const step = allSteps[stepId];
+    return {
+      title: step.name,
+      items: populatedSteps[stepId],
+    }
+  })
 
-        const tickets = populatedSteps[stepId];
+  const states = [{ id: 'open', title: 'Open' }, { id: 'closed', title: 'Closed' }];
 
-        return (
-          <Box style={{ width: '300px', flexShrink: '0', marginRight: 8 }}>
-            <Typography variant="h6" style={{ textOverflow: 'truncate', overflow: 'hidden' }}>{step.name}</Typography>
-            <Divider style={{ marginBottom: 8, marginTop: 4 }} />
-
-            {tickets.map((ticket: Ticket) => (
-              <Card style={{ marginBottom: 8 }} onClick={() => selectTicket(ticket)}>
-                <CardContent>
-                  {ticket.id!.value + ' - ' + ticket.name}
-                </CardContent>
-
-              </Card>
-            ))}
-          </Box>
-        );
-      })}
-    </Box>
-  );
+  return <>
+    <Board selectedTicket={selectedTicket} onCardClick={(card) => selectTicket(card)} cardLists={data}></Board>
+    <Board selectedTicket={selectedTicket} onCardClick={(card) => selectTicket(card)} cardLists={states.map(c => ({
+      title: c.title,
+      items: tickets.filter(ticket => ticket.ticketState == c.id)
+    }))}></Board>
+  </>
 }

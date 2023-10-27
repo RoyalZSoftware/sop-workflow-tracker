@@ -15,10 +15,14 @@ import {
 } from './dummy';
 import { AppContext } from "./AppContext";
 import { TicketContext } from "./components/tickets";
-import { Navbar } from "./components/navbar";
-import { NinjaKeysProvider } from "./ninja-keys";
+import { PluginManager } from "@sop-workflow-tracker/react-plugin-engine";
+import '@fontsource/dm-mono/300.css';
+import '@fontsource/dm-mono/400.css';
+import '@fontsource/dm-mono/500.css';
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 
-function App() {
+function App({ pluginManager }: { pluginManager: PluginManager }) {
+
   const [stepRepository] = useState(new DummyStepRepository([
     new Step("Box drucken"),
     new Step("Schraubenmounts einsetzen"),
@@ -29,7 +33,11 @@ function App() {
     new Step("Raspberry einkleben"),
     new Step("Installation vom Raspberry"),
     new Step("Test vom Raspberry"),
-    new Step("Verkabeln"),
+    new Step("Recherchieren"),
+    new Step("Outline & Key Points"),
+    new Step("Title & Seo Meta"),
+    new Step("Images"),
+    new Step("Publish"),
   ], "steps"));
   const [templateRepository] = useState(new DummyTemplateRepository([
     {
@@ -46,6 +54,16 @@ function App() {
         new StepId('8'),
       ],
       id: new TemplateId('0'),
+    }, {
+      name: "Blog Beitrag",
+      stepIds: [
+        new StepId('9'),
+        new StepId('10'),
+        new StepId('11'),
+        new StepId('12'),
+        new StepId('13'),
+        new StepId('14'),
+      ],
     }
   ], "templates"));
   const [ticketRepository] = useState(
@@ -59,12 +77,28 @@ function App() {
   );
 
   const [ticketBuilder] = useState(new TicketBuilder(stepRepository, ticketRepository, ticketStepRepository));
+  const theme = createTheme({
+    palette: {
+      mode: 'dark',
+      primary: {
+        main: '#d8b573',
+      },
+      secondary: {
+        main: '#202932',
+      },
+      error: {
+        main: '#c63a41',
+      },
+    },
+    typography: {
+      fontFamily: '"DM Mono"'
+    }
+  });
 
   return (
-    <>
-      <Navbar />
-      <div style={{ padding: 32, height: "100%" }}>
-
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div style={{ height: "100vh" }}>
         <AppContext.Provider
           value={{
             ticketRepository,
@@ -73,13 +107,14 @@ function App() {
             ticketPopulator,
             templateRepository,
             ticketBuilder,
+            pluginManager
           }}
         >
           <TicketContext></TicketContext>
         </AppContext.Provider>
-        <NinjaKeysProvider ticketRepository={ticketRepository} ticketBuilder={ticketBuilder} templateRepository={templateRepository}></NinjaKeysProvider>
       </div>
-    </>
+
+    </ThemeProvider>
   );
 }
 

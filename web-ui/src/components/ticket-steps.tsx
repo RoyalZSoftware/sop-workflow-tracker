@@ -14,7 +14,7 @@ import {
   TicketStepId,
 } from "@sop-workflow-tracker/core";
 import { useState, useEffect, useCallback } from "react";
-import { Observable } from "rxjs";
+import { Observable, tap } from "rxjs";
 
 function TicketStepStateObserver({
   ticketSteps,
@@ -71,17 +71,21 @@ export function TicketSteps({
   ticket,
   ticketPopulator,
   ticketStepRepository,
+  setRefreshed
 }: {
   ticket: Ticket;
   ticketPopulator: TicketPopulator;
   ticketStepRepository: TicketStepRepository;
+  setRefreshed: (date: Date) => any;
 }) {
   const [populatedTicket, setPopulatedTicket] = useState(
     undefined as PopulatedTicket | undefined
   );
 
   const update = (ticketStepId: TicketStepId, checked: boolean) => {
-    return ticketStepRepository.update(ticketStepId, { checked });
+    return ticketStepRepository.update(ticketStepId, { checked }).pipe(tap(() => {
+      setRefreshed(new Date());
+    }));
   };
 
   const fetch = useCallback(
@@ -102,7 +106,7 @@ export function TicketSteps({
   }, [fetch, ticket]);
 
   return (
-    <List>
+    <List style={{maxHeight: '100%', overflowY: 'scroll', height: '100%'}}>
       {(populatedTicket?.ticketSteps?.length ?? 0) > 0 ? (
         <TicketStepStateObserver
           updateDatastore={update}

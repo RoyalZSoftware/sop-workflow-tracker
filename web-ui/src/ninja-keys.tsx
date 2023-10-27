@@ -14,10 +14,9 @@ declare global {
     }
   }
 }
-export function NinjaKeysProvider({ ticketRepository, ticketBuilder, templateRepository }: { ticketRepository: TicketRepository, ticketBuilder: TicketBuilder, templateRepository: TemplateRepository }) {
+export function NinjaKeysProvider({ setRefreshedAt, ticketBuilder, templateRepository }: { setRefreshedAt: (date: Date) => void, ticketBuilder: TicketBuilder, templateRepository: TemplateRepository }) {
   const ninjakeysRef = useRef<NinjaKeys>(null);
-  // const [templates, setTemplates] = useState([] as Template[]);
-  const templates =useQuery<Template[]>(() => templateRepository.getAll());
+  const templates = useQuery<Template[]>(() => templateRepository.getAll());
 
   useEffect(() => {
     if (ninjakeysRef.current && templates) {
@@ -38,14 +37,18 @@ export function NinjaKeysProvider({ ticketRepository, ticketBuilder, templateRep
             title: c.name,
             parent: 'Create Ticket',
             handler: () => {
-              ticketBuilder.createTicketFromTemplate(c).subscribe(() => {
-                alert("Created");
+              const ticketName = prompt("Ticket name?", c.name);
+              if (ticketName === null) return;
+              ticketBuilder.createTicketFromTemplate({...c, name: ticketName}).subscribe(() => {
+                setRefreshedAt(new Date());
               });
             }
-          }))
+          })),
       ];
     }
   }, [templates]);
 
-  return (<><ninja-keys ref={ninjakeysRef}></ninja-keys></>);
+  return (<><ninja-keys className="dark" ref={ninjakeysRef}>
+    <p>Hallo</p>
+    </ninja-keys></>);
 }

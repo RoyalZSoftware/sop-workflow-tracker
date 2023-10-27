@@ -13,6 +13,7 @@ export class TicketId {
 export class Ticket {
     public id?: TicketId;
     public templateId?: TemplateId;
+    public ticketState: string = 'open';
 
     constructor(public name: string, public ticketStepIds: TicketStepId[] = []) { }
 }
