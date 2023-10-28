@@ -3,6 +3,7 @@ import {
     Paper,
     Tab,
     Tabs,
+    Typography,
 } from "@mui/material";
 import {
     Ticket,
@@ -45,7 +46,7 @@ export function DashboardPage() {
     return (
         <div style={{ height: '100%', padding: 32 }}>
             <Grid container spacing={2} style={{ height: "100%" }}>
-                <Grid item xs={gridFor('board', 12)} style={{ ...styleFor('board'), transition: '0.15s all' }}>
+                <Grid item xs={gridFor('board', 12)} style={{ ...styleFor('board')}}>
                     <Paper style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 8, position: 'relative' }}>
                         <DefaultToggleFullScreenButton widgetId="board"/>
                         <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
@@ -73,13 +74,14 @@ export function DashboardPage() {
                 <Grid item xs={gridFor('ticket-list', 6)} style={{ height: '50%', ...styleFor('ticket-list') }}>
                     <Paper
                         elevation={1}
-                        style={{ height: "100%", position: "relative" }}
+                        style={{ height: "100%", position: "relative"}}
                     >
                         <DefaultToggleFullScreenButton widgetId="ticket-list"/>
+                        <Typography variant="h6" style={{ padding: 16 }}>Tickets</Typography>
                         <TicketsList selectTicket={selectTicket} selectedTicket={selectedTicket} tickets={tickets} />
                     </Paper>
                 </Grid>
-                <Grid item xs={gridFor('details-widget', 6)}style={{ height: '50%', ...styleFor('details-widget') }}>
+                <Grid item xs={gridFor('details-widget', 6)} style={{ height: '50%', ...styleFor('details-widget') }}>
                     <Paper elevation={1} style={{ padding: 8, maxHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                         <DefaultToggleFullScreenButton widgetId="details-widget"/>
                         <DetailsWidget setRefreshed={setRefreshed} ticketStepRepository={ticketStepRepository} ticketPopulator={ticketPopulator} selectedTicket={selectedTicket} plugins={plugins} />
