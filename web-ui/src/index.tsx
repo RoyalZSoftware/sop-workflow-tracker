@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { PluginManager } from '@sop-workflow-tracker/react-plugin-engine';
 import { CommentsPlugin } from '@sop-workflow-tracker/comments-plugin';
 import { ImagesPlugin } from '@sop-workflow-tracker/images-plugin';
+import { HashnodePlugin } from './pages/hashnode-plugin';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -14,6 +15,7 @@ const root = ReactDOM.createRoot(
 const pluginManager = new PluginManager();
 
 pluginManager.registerPlugin(new CommentsPlugin());
+pluginManager.registerPlugin(new HashnodePlugin());
 pluginManager.registerPlugin(new ImagesPlugin());
 
 root.render(

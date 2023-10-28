@@ -15,14 +15,14 @@ export function TicketsList({
   };
 
   return (
-    <List sx={{ width: "100%", maxHeight: '100%', overflowY: 'auto' }}>
+    <List sx={{ width: "100%", maxHeight: '100%', overflowY: 'scroll' }}>
       {tickets.map((ticket) => (
         <ListItemButton
           selected={selectedTicket === ticket}
           onClick={() => onClick(ticket)}
           style={{ width: "100%" }}
         >
-          <ListItemText primary={"# " + ticket.id!.value + " - " + ticket.name} />
+          <ListItemText primary={ticket.name} />
         </ListItemButton>
       ))}
     </List>

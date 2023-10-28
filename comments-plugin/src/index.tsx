@@ -25,7 +25,6 @@ export class CommentListTicketDetailsView extends TicketDetailsPluginView {
                 if (ticket == undefined) return;
                 this._commentsRepository.getAllFor(ticket?.id!).subscribe((fetched) => {
                     setComments(fetched)
-                    console.log(fetched);
                 })
             }, [refreshed]);
             return <>

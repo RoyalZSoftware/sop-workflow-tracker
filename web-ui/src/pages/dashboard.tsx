@@ -8,7 +8,7 @@ import {
 import {
     Ticket,
 } from "@sop-workflow-tracker/core";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../AppContext";
 import { useQuery } from "../data-provider/use-query";
 import { NinjaKeysProvider } from "../ninja-keys";
@@ -32,7 +32,12 @@ export function DashboardPage() {
     } = useContext(AppContext);
     const [selectedTicket, selectTicket] = useState(undefined as any as Ticket);
     const [refreshedAt, setRefreshed] = useState(new Date());
-    const tickets = useQuery<Ticket[]>(() => ticketRepository.getAll());
+    const [tickets, setTickets] = useState([] as any[]);
+    useEffect(() => {
+        ticketRepository.getAll().subscribe((fetched) => {
+            setTickets(fetched)
+        })
+    }, [])
 
     const { styleFor, DefaultToggleFullScreenButton, gridFor } = useFullScreen();
 
@@ -40,15 +45,12 @@ export function DashboardPage() {
 
     const [plugins] = useState(pluginManager.plugins);
 
-    if (tickets == undefined)
-        return <></>;
-
     return (
         <div style={{ height: '100%', padding: 32 }}>
             <Grid container spacing={2} style={{ height: "100%" }}>
-                <Grid item xs={gridFor('board', 12)} style={{ height: '50%', ...styleFor('board')}}>
+                <Grid item xs={gridFor('board', 12)} style={{ height: '50%', ...styleFor('board') }}>
                     <Paper style={{ height: '100%', display: 'flex', flexShrink: 0, minHeight: '100%', flexDirection: 'column', padding: 8, position: 'relative' }}>
-                        <DefaultToggleFullScreenButton widgetId="board"/>
+                        <DefaultToggleFullScreenButton widgetId="board" />
                         <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
                             <Tab label="By State" value="0"></Tab>
                             <Tab label="By Steps" value="1"></Tab>
@@ -75,16 +77,16 @@ export function DashboardPage() {
                 <Grid item xs={gridFor('ticket-list', 6)} style={{ height: '50%', ...styleFor('ticket-list') }}>
                     <Paper
                         elevation={1}
-                        style={{ height: "100%", position: "relative"}}
+                        style={{ height: "100%", position: "relative", display: 'flex', flexDirection: 'column' }}
                     >
-                        <DefaultToggleFullScreenButton widgetId="ticket-list"/>
+                        <DefaultToggleFullScreenButton widgetId="ticket-list" />
                         <Typography variant="h6" style={{ padding: 16 }}>Tickets</Typography>
                         <TicketsList selectTicket={selectTicket} selectedTicket={selectedTicket} tickets={tickets} />
                     </Paper>
                 </Grid>
                 <Grid item xs={gridFor('details-widget', 6)} style={{ height: '50%', ...styleFor('details-widget') }}>
                     <Paper elevation={1} style={{ padding: 8, maxHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                        <DefaultToggleFullScreenButton widgetId="details-widget"/>
+                        <DefaultToggleFullScreenButton widgetId="details-widget" />
                         <DetailsWidget setRefreshed={setRefreshed} ticketStepRepository={ticketStepRepository} ticketPopulator={ticketPopulator} selectedTicket={selectedTicket} plugins={plugins} />
                     </Paper>
                 </Grid>

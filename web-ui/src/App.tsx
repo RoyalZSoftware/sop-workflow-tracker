@@ -10,7 +10,6 @@ import {
 import {
   DummyStepRepository,
   DummyTemplateRepository,
-  DummyTicketRepository,
   DummyTicketStepRepository,
 } from './dummy';
 import { AppContext } from "./AppContext";
@@ -20,6 +19,9 @@ import '@fontsource/dm-mono/300.css';
 import '@fontsource/dm-mono/400.css';
 import '@fontsource/dm-mono/500.css';
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { HashnodeGQLClient, HashnodeTicketRepo } from "./pages/hashnode-plugin";
+
+const hashnodeClient = new HashnodeGQLClient()
 
 function App({ pluginManager }: { pluginManager: PluginManager }) {
 
@@ -66,9 +68,8 @@ function App({ pluginManager }: { pluginManager: PluginManager }) {
       ],
     }
   ], "templates"));
-  const [ticketRepository] = useState(
-    new DummyTicketRepository([], "tickets")
-  );
+  const [ticketRepository] = useState(new HashnodeTicketRepo(hashnodeClient));
+  // new DummyTicketRepository([], "tickets")
   const [ticketStepRepository] = useState(
     new DummyTicketStepRepository([], "ticket_steps")
   );
