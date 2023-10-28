@@ -11,51 +11,12 @@ import { useContext, useState } from "react";
 import { AppContext } from "../AppContext";
 import { useQuery } from "../data-provider/use-query";
 import { NinjaKeysProvider } from "../ninja-keys";
-import { Fullscreen } from "@mui/icons-material";
 import { Board } from "../components/kanban-board/card-list";
 import { TabPanel } from "../components/tab-panel";
 import { DetailsWidget } from "./components/details-widget";
 import { TicketBoardByStep } from "./components/ticket-board-by-step";
 import { TicketsList } from "./components/ticket-list";
-
-export function useFullScreen() {
-    const [fullScreenWidgetId, setFullScreenWidgetId] = useState<string | undefined>(undefined);
-
-    const toggleFullScreen = (widgetId: string) => {
-        if (fullScreenWidgetId !== widgetId)
-            setFullScreenWidgetId(widgetId);
-        else
-            setFullScreenWidgetId(undefined);
-    };
-
-    return {
-        styleFor: (widgetId: string) => {
-            if (fullScreenWidgetId === undefined) {
-                return {};
-            }
-            if (fullScreenWidgetId === widgetId) {
-                return { height: '100%', width: '100%', maxWidth: '100%' };
-            }
-            return { display: 'none' };
-        },
-        gridFor: (widgetId: string, originalSize: any) => {
-            if (fullScreenWidgetId === undefined) {
-                return originalSize;
-            }
-            if (fullScreenWidgetId === widgetId) {
-                return 12;
-            }
-            return originalSize;
-        },
-        isFullScreen: (widgetId: string) => {
-            return fullScreenWidgetId === widgetId;
-        },
-        toggleFullScreen,
-        DefaultToggleFullScreenButton: ({widgetId}: {widgetId: string}) => {
-            return <Fullscreen onClick={() => toggleFullScreen(widgetId)} style={{ cursor: 'pointer', zIndex: 400, position: 'absolute', top: 16, right: 16 }} />
-        }
-    };
-}
+import { useFullScreen } from "../components/use-full-screen";
 
 
 export function DashboardPage() {
@@ -72,7 +33,7 @@ export function DashboardPage() {
     const [refreshedAt, setRefreshed] = useState(new Date());
     const tickets = useQuery<Ticket[]>(() => ticketRepository.getAll());
 
-    const { styleFor, DefaultToggleFullScreenButton, gridFor, isFullScreen } = useFullScreen();
+    const { styleFor, DefaultToggleFullScreenButton, gridFor } = useFullScreen();
 
     const [selectedTab, setSelectedTab] = useState('0');
 
@@ -119,7 +80,7 @@ export function DashboardPage() {
                     </Paper>
                 </Grid>
                 <Grid item xs={gridFor('details-widget', 6)}style={{ height: '50%', ...styleFor('details-widget') }}>
-                    <Paper elevation={1} style={{ padding: 32, maxHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                    <Paper elevation={1} style={{ padding: 8, maxHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                         <DefaultToggleFullScreenButton widgetId="details-widget"/>
                         <DetailsWidget setRefreshed={setRefreshed} ticketStepRepository={ticketStepRepository} ticketPopulator={ticketPopulator} selectedTicket={selectedTicket} plugins={plugins} />
                     </Paper>
