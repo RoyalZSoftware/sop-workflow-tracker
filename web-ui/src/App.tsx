@@ -14,7 +14,7 @@ import {
   DummyTicketStepRepository,
 } from './dummy';
 import { AppContext } from "./AppContext";
-import { TicketContext } from "./components/tickets";
+import { DashboardPage } from "./pages/dashboard";
 import { PluginManager } from "@sop-workflow-tracker/react-plugin-engine";
 import '@fontsource/dm-mono/300.css';
 import '@fontsource/dm-mono/400.css';
@@ -110,7 +110,7 @@ function App({ pluginManager }: { pluginManager: PluginManager }) {
             pluginManager
           }}
         >
-          <TicketContext></TicketContext>
+          <DashboardPage></DashboardPage>
         </AppContext.Provider>
       </div>
 
