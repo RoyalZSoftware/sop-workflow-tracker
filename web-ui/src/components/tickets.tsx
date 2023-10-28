@@ -16,6 +16,7 @@ import {
   Step,
   StepRepository,
   Ticket,
+  TicketPopulator,
   TicketRepository,
   TicketStepRepository,
 } from "@sop-workflow-tracker/core";
@@ -28,7 +29,7 @@ import { getStepGroupedTickets, reduceToMap } from "../data-provider/grouped-tic
 import { Board } from "./kanban-board/card-list";
 import { NinjaKeysProvider } from "../ninja-keys";
 import { Fullscreen } from "@mui/icons-material";
-import { TicketDetailsPluginView} from '@sop-workflow-tracker/react-plugin-engine'
+import { Plugin, TicketDetailsPluginView } from '@sop-workflow-tracker/react-plugin-engine'
 
 
 interface TabPanelProps {
@@ -122,7 +123,6 @@ export function TicketContext() {
   );
 
   const [selectedTab, setSelectedTab] = useState('0');
-  const [selectedDetailsTab, setSelectedDetailsTab] = useState('0');
 
   const [plugins] = useState(pluginManager.plugins);
 
@@ -169,40 +169,58 @@ export function TicketContext() {
             </Grid>
             <Grid item xs={6} style={{ height: '50%' }}>
               <Paper elevation={1} style={{ padding: 32, maxHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Tabs value={selectedDetailsTab} onChange={(_, v) => setSelectedDetailsTab(v)}>
-                  <Tab label="Steps" value="0"></Tab>
-                  {plugins.map((plugin: any) => (<Tab label={plugin.id} value={plugin.id}></Tab>))}
-                </Tabs>
-                {selectedTicket !== undefined ? (
-                  <>
-                    <CustomTabPanel value={selectedDetailsTab} index={'0'}>
-                      <TicketSteps
-                        ticketStepRepository={ticketStepRepository}
-                        ticketPopulator={ticketPopulator}
-                        ticket={selectedTicket}
-                        setRefreshed={setRefreshed}
-                      ></TicketSteps>
-                    </CustomTabPanel>
-                    {plugins.map((plugin: any) => (
-                    <CustomTabPanel value={selectedDetailsTab} index={plugin.id}>
-                      <div style={{ overflowY: 'auto' }}>
-                        {plugin.registeredViews.filter((c: any) => c.viewType === 'ticket_details').map((view: TicketDetailsPluginView) => view.render({ticket: selectedTicket as any as PopulatedTicket}))}
-                      </div>
-                    </CustomTabPanel>
-                    ))}
-                  </>
-                ) : (
-                  <Typography variant="body1">Kein Ticket ausgewählt.</Typography>
-                )}
+                <DetailsWidget setRefreshed={setRefreshed} ticketStepRepository={ticketStepRepository} ticketPopulator={ticketPopulator} selectedTicket={selectedTicket} plugins={plugins}/>
               </Paper>
             </Grid>
-
           </>
         }
       </Grid>
       <NinjaKeysProvider setRefreshedAt={setRefreshed} ticketBuilder={ticketBuilder} templateRepository={templateRepository}></NinjaKeysProvider>
     </div>
   );
+}
+
+function DetailsWidget({ plugins, selectedTicket, ticketStepRepository, ticketPopulator, setRefreshed }: { plugins: Plugin[], selectedTicket: Ticket, ticketStepRepository: TicketStepRepository, ticketPopulator: TicketPopulator, setRefreshed: (d: Date) => void }) {
+  const [selectedDetailsTab, setSelectedDetailsTab] = useState('comments');
+
+  const pluginViews = plugins.map((plugin: Plugin) => {
+    const view = plugin.registeredViews.find(pluginView => pluginView.viewType === 'ticket_details') as TicketDetailsPluginView | undefined;
+
+    return {
+      Tab: <Tab label={plugin.id} value={plugin.id}></Tab>,
+      TabPanel: () => <CustomTabPanel value={selectedDetailsTab} index={plugin.id}>
+        <div style={{ overflowY: 'auto' }}>
+          {view?.render({ ticket: selectedTicket as any as PopulatedTicket })}
+        </div>
+      </CustomTabPanel>,
+    }
+  });
+
+  return <>
+    <Tabs value={selectedDetailsTab} onChange={(_, v) => setSelectedDetailsTab(v)} children={
+      [
+      <Tab label="Steps" value="0"></Tab>,
+      ...pluginViews.map(pluginView => (pluginView.Tab)),
+      ]
+    }/>
+    {
+      selectedTicket !== undefined ? (
+        <>
+          <CustomTabPanel value={selectedDetailsTab} index={'0'}>
+            <TicketSteps
+              ticketStepRepository={ticketStepRepository}
+              ticketPopulator={ticketPopulator}
+              ticket={selectedTicket}
+              setRefreshed={setRefreshed}
+            ></TicketSteps>
+          </CustomTabPanel>
+          {pluginViews.map(pluginView => <pluginView.TabPanel></pluginView.TabPanel>)}
+        </>
+      ) : (
+        <Typography variant="body1">No ticket selected.</Typography>
+      )
+    }
+  </>
 }
 
 
