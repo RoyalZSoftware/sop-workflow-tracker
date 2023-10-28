@@ -61,6 +61,7 @@ export function DashboardPage() {
                         </TabPanel>
                         <TabPanel value={selectedTab} index={'1'}>
                             <TicketBoardByStep
+                                templateRepository={templateRepository}
                                 selectTicket={selectTicket}
                                 selectedTicket={selectedTicket}
                                 ticketStepRepository={ticketStepRepository}

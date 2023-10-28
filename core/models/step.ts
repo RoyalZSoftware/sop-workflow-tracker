@@ -5,7 +5,6 @@ export class StepId {
 }
 
 export class Step {
-    templateId?: TemplateId;
     id?: StepId;
-    constructor(public name: string, public description?: string) { }
+    constructor(public name: string, public description?: string, public templateId?: TemplateId) { }
 }

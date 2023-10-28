@@ -24,20 +24,20 @@ import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 function App({ pluginManager }: { pluginManager: PluginManager }) {
 
   const [stepRepository] = useState(new DummyStepRepository([
-    new Step("Box drucken"),
-    new Step("Schraubenmounts einsetzen"),
-    new Step("1. Schablonenwand drucken"),
-    new Step("2. Schablonenwand drucken"),
-    new Step("3. Schablonenwand drucken"),
-    new Step("PCBs einkleben"),
-    new Step("Raspberry einkleben"),
-    new Step("Installation vom Raspberry"),
-    new Step("Test vom Raspberry"),
-    new Step("Recherchieren"),
-    new Step("Outline & Key Points"),
-    new Step("Title & Seo Meta"),
-    new Step("Images"),
-    new Step("Publish"),
+    new Step("Box drucken", undefined, new TemplateId('0')),
+    new Step("Schraubenmounts einsetzen", undefined, new TemplateId('0')),
+    new Step("1. Schablonenwand drucken", undefined, new TemplateId('0')),
+    new Step("2. Schablonenwand drucken", undefined, new TemplateId('0')),
+    new Step("3. Schablonenwand drucken", undefined, new TemplateId('0')),
+    new Step("PCBs einkleben", undefined, new TemplateId('0')),
+    new Step("Raspberry einkleben", undefined, new TemplateId('0')),
+    new Step("Installation vom Raspberry", undefined, new TemplateId('0')),
+    new Step("Test vom Raspberry", undefined, new TemplateId('0')),
+    new Step("Recherchieren", undefined, new TemplateId('1')),
+    new Step("Outline & Key Points", undefined, new TemplateId('1')),
+    new Step("Title & Seo Meta", undefined, new TemplateId('1')),
+    new Step("Images", undefined, new TemplateId('1')),
+    new Step("Publish", undefined, new TemplateId('1')),
   ], "steps"));
   const [templateRepository] = useState(new DummyTemplateRepository([
     {

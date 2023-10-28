@@ -11,7 +11,7 @@ export function TicketCard({ ticket, onCardClick, isSelected }: { ticket: Ticket
 
 export function CardList({ items, title, onCardClick, selectedTicket }: { items: Ticket[], title: string, onCardClick: (ticket: Ticket) => void, selectedTicket: Ticket | undefined }) {
     return <Paper elevation={4} style={{ minWidth: 400, width: 400, height: '100%', maxHeight: '100%', display: 'flex', flexDirection: 'column', padding: 16}}>
-        <Typography variant="h6" style={{ margin: 8 }}>{title}</Typography>
+        <Typography variant="h6" style={{ margin: 8, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</Typography>
         <div style={{ padding: 8, gap: 8, display: 'flex', flexDirection: 'column', overflowY: 'auto', height: '100%' }}>
             {items.map(c => (<TicketCard isSelected={selectedTicket?.id!.value === c.id!.value} onCardClick={onCardClick} ticket={c}></TicketCard>))}
         </div>

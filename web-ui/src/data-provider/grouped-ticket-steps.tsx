@@ -14,7 +14,7 @@ export function getStepGroupedTickets({
 }: {
   ticketStepRepository: TicketStepRepository;
   tickets: Ticket[]
-}): Observable<{ [stepId: string]: Ticket }> {
+}): Observable<{ [stepId: string]: Ticket[] }> {
   const allTicketSteps$ = ticketStepRepository
     .query({})
     .pipe(map(({ data }) => data));
