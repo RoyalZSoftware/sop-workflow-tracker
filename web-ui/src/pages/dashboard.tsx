@@ -46,8 +46,8 @@ export function DashboardPage() {
     return (
         <div style={{ height: '100%', padding: 32 }}>
             <Grid container spacing={2} style={{ height: "100%" }}>
-                <Grid item xs={gridFor('board', 12)} style={{ ...styleFor('board')}}>
-                    <Paper style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 8, position: 'relative' }}>
+                <Grid item xs={gridFor('board', 12)} style={{ height: '50%', ...styleFor('board')}}>
+                    <Paper style={{ height: '100%', display: 'flex', flexShrink: 0, minHeight: '100%', flexDirection: 'column', padding: 8, position: 'relative' }}>
                         <DefaultToggleFullScreenButton widgetId="board"/>
                         <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
                             <Tab label="By State" value="0"></Tab>

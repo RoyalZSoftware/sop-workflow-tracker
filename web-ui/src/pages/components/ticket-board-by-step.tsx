@@ -31,7 +31,7 @@ export function TicketBoardByStep({
   );
 
   if (allSteps === undefined || populatedSteps === undefined) {
-    return <></>;
+    return <Board selectedTicket={undefined} onCardClick={() => {}} cardLists={[]}></Board>;
   }
 
   const data = Object.keys(populatedSteps).map(stepId => {
@@ -42,7 +42,5 @@ export function TicketBoardByStep({
     }
   })
 
-  return <>
-    <Board selectedTicket={selectedTicket} onCardClick={(card) => selectTicket(card)} cardLists={data}></Board>
-  </>
+  return <Board selectedTicket={selectedTicket} onCardClick={(card) => selectTicket(card)} cardLists={data}></Board>;
 }
