@@ -106,7 +106,7 @@ export function TicketSteps({
   }, [fetch, ticket]);
 
   return (
-    <List style={{maxHeight: '100%', overflowY: 'scroll', height: '100%'}}>
+    <List style={{maxHeight: '100%', overflowY: 'auto', height: '100%'}}>
       {(populatedTicket?.ticketSteps?.length ?? 0) > 0 ? (
         <TicketStepStateObserver
           updateDatastore={update}

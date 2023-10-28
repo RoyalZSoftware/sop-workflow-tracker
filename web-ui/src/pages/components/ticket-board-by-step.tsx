@@ -31,7 +31,7 @@ export function TicketBoardByStep({
   );
 
   if (allSteps === undefined || populatedSteps === undefined) {
-    return <h2>Loading...</h2>;
+    return <></>;
   }
 
   const data = Object.keys(populatedSteps).map(stepId => {
